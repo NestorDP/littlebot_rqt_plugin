@@ -4,8 +4,8 @@
 #include <QWidget>
 #include <QPushButton>
 
-#include "qtros2/ros2node.hpp"
-#include "qtros2/custom_widgets/lineedit.hpp"
+#include "littlebot_gui/littlebot_gui_node.hpp"
+#include "littlebot_gui/lineedit.hpp"
 
 class MainGUI : public QMainWindow
 {

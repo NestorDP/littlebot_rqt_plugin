@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>qtros2</name>
+  <name>littlebot_gui</name>
   <version>0.0.1</version>
   <description>
      Example app using QT Widgets and ROS2

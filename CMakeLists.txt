@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16.3)
-project(qtros2)
+project(littlebot_gui)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
@@ -45,14 +45,16 @@ set(CMAKE_AUTORCC ON)
 ## Build ##
 ###########
 
+# include_directories(include)
+
 add_executable(${PROJECT_NAME}
   src/main.cpp
-  src/main_gui.cpp
-  src/ros2node.cpp
-  src/custom_widgets/lineedit.cpp
-  include/${PROJECT_NAME}/ros2node.hpp
-  include/${PROJECT_NAME}/main_gui.hpp
-  include/${PROJECT_NAME}/custom_widgets/lineedit.hpp
+  src/littlebot_gui.cpp
+  src/littlebot_gui_node.cpp
+  src/lineedit.cpp
+  include/${PROJECT_NAME}/littlebot_gui_node.hpp
+  include/${PROJECT_NAME}/littlebot_gui.hpp
+  include/${PROJECT_NAME}/lineedit.hpp
 )
 
 target_include_directories(${PROJECT_NAME}
