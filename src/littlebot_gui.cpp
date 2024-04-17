@@ -13,6 +13,7 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 
 void LittlebotGui::ButtonClicked()
 {
+    sendCommand();
     std::cout << "Button clicked" << std::endl;
 }
 

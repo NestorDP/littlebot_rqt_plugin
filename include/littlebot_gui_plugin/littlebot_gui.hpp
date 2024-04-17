@@ -15,7 +15,7 @@ public:
     ~LittlebotGui() override = default;
 
 signals:
-    void sendCommand(const std::string & command);
+    void sendCommand();
 
 private:
     Ui::LittlebotGui ui_;
