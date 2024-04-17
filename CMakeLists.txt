@@ -1,98 +1,103 @@
-cmake_minimum_required(VERSION 3.16.3)
-project(littlebot_gui)
+cmake_minimum_required(VERSION 3.8)
+project(littlebot_gui_plugin)
 
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD 14)
 endif()
 
-find_package(ament_cmake REQUIRED)
-find_package(ament_index_cpp REQUIRED)
-find_package(control_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(interactive_markers REQUIRED)
-find_package(pluginlib REQUIRED)
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Quick REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(rviz_common REQUIRED)
-find_package(rviz_default_plugins REQUIRED)
-find_package(rviz_rendering REQUIRED)
-find_package(std_srvs REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(tf2_eigen REQUIRED)
-find_package(tf2_geometry_msgs REQUIRED)
-find_package(tf2_ros REQUIRED)
-
-set(THIS_PACKAGE_INCLUDE_DEPENDS
-    ament_index_cpp
-    control_msgs
-    geometry_msgs
-    rclcpp
-    rviz_common
-    rviz_default_plugins
-    rviz_rendering
-    std_msgs
-    std_srvs
-)
-
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTORCC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-###########
-## Build ##
-###########
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rqt_gui_cpp REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Widgets)
+find_package(qt_gui_cpp REQUIRED)
+find_package(pluginlib REQUIRED)
 
-# include_directories(include)
-
-add_executable(${PROJECT_NAME}
-  src/main.cpp
-  src/littlebot_gui.cpp
-  src/littlebot_gui_node.cpp
-  src/lineedit.cpp
-  include/${PROJECT_NAME}/littlebot_gui_node.hpp
-  include/${PROJECT_NAME}/littlebot_gui.hpp
-  include/${PROJECT_NAME}/lineedit.hpp
+file(GLOB_RECURSE $(PROJECT_NAME)_LIB 
+  "src/*.c*"
+)
+file(GLOB_RECURSE $(PROJECT_NAME)_HEADERS
+  "include/${PROJECT_NAME}/*.h*"
+)
+file(GLOB_RECURSE $(PROJECT_NAME)_UI
+  "ui/*.ui"
 )
 
-target_include_directories(${PROJECT_NAME}
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  PUBLIC $<INSTALL_INTERFACE:include>)
+set(${PROJECT_NAME}_INCLUDE_DIR
+  include
+  ${rclcpp_INCLUDE_DIRS}
+  ${qt_gui_cpp_INCLUDE_DIRS}
+  ${rqt_gui_cpp_INCLUDE_DIRS}
+  ${std_msgs_INCLUDE_DIRS}
+  ${Qt5Widgets_INCLUDE_DIRS}
+)
 
-# ament_target_dependencies(${PROJECT_NAME} SYSTEM rviz_visual_tools)
-ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+qt5_wrap_cpp(${PROJECT_NAME}_LIB_MOC ${${PROJECT_NAME}_HEADERS})
+qt5_wrap_ui(${PROJECT_NAME}_UI_MOC ${${PROJECT_NAME}_UI})
 
-target_link_libraries(${PROJECT_NAME}
-  ${moveit_ros_planning_LIBRARIES}
-  Qt5::Core
-  Qt5::Quick
+include_directories(
+  ${${PROJECT_NAME}_INCLUDE_DIRECTORIES}
+)
+
+add_library(${PROJECT_NAME} SHARED
+  ${${PROJECT_NAME}_LIB}
+  ${${PROJECT_NAME}_LIB_MOC}
+  ${${PROJECT_NAME}_UI_MOC}
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+  ${${PROJECT_NAME}_INCLUDE_DIR}
+)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC
+  ${rclcpp_LIBRARIES}
+  ${qt_gui_cpp_LIBRARIES}
+  ${rqt_gui_cpp_LIBRARIES}
+  ${std_msgs_LIBRARIES}
   Qt5::Widgets
 )
 
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
+ament_target_dependencies(${PROJECT_NAME} PUBLIC
+  pluginlib
+  qt_gui_cpp
+  Qt5Widgets
+  rclcpp
+  rqt_gui_cpp
+)
 
-#############
-## Install ##
-#############
-
-# Install executables
 install(
-  TARGETS
-    ${PROJECT_NAME}
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}
   ARCHIVE DESTINATION lib/${PROJECT_NAME}
   LIBRARY DESTINATION lib/${PROJECT_NAME}
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  RUNTIME DESTINATION bin/${PROJECT_NAME}
+  INCLUDES DESTINATION include
 )
 
-# Install include, launch, config directories
-install(
-  DIRECTORY
-    launch
-    resources
+install(FILES plugin.xml
   DESTINATION share/${PROJECT_NAME}
 )
+
+install(PROGRAMS
+  scripts/${PROJECT_NAME}
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY ui launch scripts
+  DESTINATION share/${PROJECT_NAME}
+)
+
+pluginlib_export_plugin_description_file(rqt_gui "plugin.xml")
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
+
 
 # if(BUILD_TESTING)
 #   find_package(ament_lint_auto REQUIRED)

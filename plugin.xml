@@ -1,0 +1,17 @@
+<library path="littlebot_gui_plugin">
+  <class name="littlebot_gui_plugin/littlebot_gui_plugin" type="littlebot_gui_plugin::LittlebotGuiPlugin" base_class_type="rqt_gui_cpp::Plugin">
+    <description>
+      A gui to viewr datas from littlebot robot
+    </description>
+    <qtgui>
+      <group>
+        <label>Inspection</label>
+        <statustip>Inspect the robot</statustip>
+        <icon type="theme">folder</icon>      
+      </group>
+      <label>Littlebot GUI</label>
+      <icon type="theme">system-help</icon>
+      <statustip>Gui to control littlebot robot.</statustip>
+    </qtgui>
+  </class>
+</library>
