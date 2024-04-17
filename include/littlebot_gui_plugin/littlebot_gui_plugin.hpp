@@ -4,6 +4,7 @@
 
 #include <QWidget>
 #include <string>
+#include <memory>
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
@@ -21,9 +22,12 @@ public:
   
   ~LittlebotGuiPlugin() override = default;
 
+private:
   void initPlugin(qt_gui_cpp::PluginContext& context) override;
 
   void handleSpinOnTimer();
+
+  void shutdownPlugin() ;
 
   void sendCommand();
 

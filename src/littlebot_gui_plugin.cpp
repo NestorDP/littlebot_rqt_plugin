@@ -1,8 +1,10 @@
-#include "littlebot_gui_plugin/littlebot_gui_plugin.hpp"
+
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(littlebot_gui_plugin::LittlebotGuiPlugin, rqt_gui_cpp::Plugin)
+#include <QTimer>
+
+#include "littlebot_gui_plugin/littlebot_gui_plugin.hpp"
 
 namespace littlebot_gui_plugin
 {
@@ -14,6 +16,7 @@ LittlebotGuiPlugin::LittlebotGuiPlugin()
   node_ = std::make_shared<rclcpp::Node>("littlebot_gui_plugin");
 
   QTimer * ros_spin_timer = new QTimer(this);
+
   connect(ros_spin_timer, &QTimer::timeout, this, &LittlebotGuiPlugin::handleSpinOnTimer);
 
   ros_spin_timer->start(500);
@@ -33,6 +36,11 @@ void LittlebotGuiPlugin::handleSpinOnTimer()
   rclcpp::spin_some(node_);
 }
 
+void LittlebotGuiPlugin::shutdownPlugin()
+{
+  node_.reset();
+}
+
 void LittlebotGuiPlugin::sendCommand()
 {
   std_msgs::msg::String msg;
@@ -40,3 +48,5 @@ void LittlebotGuiPlugin::sendCommand()
   publisher_->publish(msg);
 }
 }  // namespace littlebot_gui_plugin
+
+PLUGINLIB_EXPORT_CLASS(littlebot_gui_plugin::LittlebotGuiPlugin, rqt_gui_cpp::Plugin)

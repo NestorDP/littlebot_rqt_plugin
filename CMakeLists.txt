@@ -15,13 +15,11 @@ find_package(Qt5 REQUIRED COMPONENTS Widgets)
 find_package(qt_gui_cpp REQUIRED)
 find_package(pluginlib REQUIRED)
 
-file(GLOB_RECURSE $(PROJECT_NAME)_LIB 
-  "src/*.c*"
-)
-file(GLOB_RECURSE $(PROJECT_NAME)_HEADERS
+
+file(GLOB_RECURSE ${PROJECT_NAME}_HEADERS
   "include/${PROJECT_NAME}/*.h*"
 )
-file(GLOB_RECURSE $(PROJECT_NAME)_UI
+file(GLOB_RECURSE ${PROJECT_NAME}_QT_UI_SOURCES
   "ui/*.ui"
 )
 
@@ -35,14 +33,15 @@ set(${PROJECT_NAME}_INCLUDE_DIR
 )
 
 qt5_wrap_cpp(${PROJECT_NAME}_LIB_MOC ${${PROJECT_NAME}_HEADERS})
-qt5_wrap_ui(${PROJECT_NAME}_UI_MOC ${${PROJECT_NAME}_UI})
+qt5_wrap_ui(${PROJECT_NAME}_UI_MOC ${${PROJECT_NAME}_QT_UI_SOURCES})
 
 include_directories(
   ${${PROJECT_NAME}_INCLUDE_DIRECTORIES}
 )
 
 add_library(${PROJECT_NAME} SHARED
-  ${${PROJECT_NAME}_LIB}
+  src/littlebot_gui_plugin.cpp
+  src/littlebot_gui.cpp
   ${${PROJECT_NAME}_LIB_MOC}
   ${${PROJECT_NAME}_UI_MOC}
 )

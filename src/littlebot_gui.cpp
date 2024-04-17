@@ -5,7 +5,7 @@
 namespace littlebot_gui_plugin
 {
 LittlebotGui::LittlebotGui(QWidget *parent)
-    : QWidget(parent)
+    : QDialog(parent)
 {
     ui_.setupUi(this);
     connect(ui_.pushButton, &QPushButton::clicked, this, &LittlebotGui::ButtonClicked);
