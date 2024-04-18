@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(littlebot_gui_plugin)
 
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 20)
 endif()
 
 set(CMAKE_AUTOMOC ON)
@@ -16,11 +16,18 @@ find_package(qt_gui_cpp REQUIRED)
 find_package(pluginlib REQUIRED)
 
 
-file(GLOB_RECURSE ${PROJECT_NAME}_HEADERS
-  "include/${PROJECT_NAME}/*.h*"
+set(${PROJECT_NAME}_SRCS
+  src/littlebot_gui_plugin.cpp
+  src/littlebot_gui.cpp
 )
-file(GLOB_RECURSE ${PROJECT_NAME}_QT_UI_SOURCES
-  "ui/*.ui"
+
+set(${PROJECT_NAME}_HEADERS
+  include/${PROJECT_NAME}/littlebot_gui_plugin.hpp
+  include/${PROJECT_NAME}/littlebot_gui.hpp
+)
+
+set(${PROJECT_NAME}_QT_UI_SOURCES
+  ui/littlebot_gui.ui
 )
 
 set(${PROJECT_NAME}_INCLUDE_DIR
@@ -40,8 +47,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME} SHARED
-  src/littlebot_gui_plugin.cpp
-  src/littlebot_gui.cpp
+  ${${PROJECT_NAME}_SRCS}
   ${${PROJECT_NAME}_LIB_MOC}
   ${${PROJECT_NAME}_UI_MOC}
 )
@@ -97,15 +103,5 @@ pluginlib_export_plugin_description_file(rqt_gui "plugin.xml")
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
 
-
-# if(BUILD_TESTING)
-#   find_package(ament_lint_auto REQUIRED)
-#   add_subdirectory(test)
-
-#   # ROS2 linters, but disable copyright test. PickNik's copyright's may not conform
-#   # to this test
-#   # set(ament_cmake_copyright_FOUND TRUE)
-#   # ament_lint_auto_find_test_dependencies()
-# endif()
 
 ament_package()
