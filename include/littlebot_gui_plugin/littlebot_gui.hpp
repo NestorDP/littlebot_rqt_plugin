@@ -17,6 +17,9 @@ public:
 signals:
     void sendCommand();
 
+public slots:
+    void writeText(const std::string &text);
+
 private:
     Ui::LittlebotGui ui_;
 

@@ -22,6 +22,9 @@ public:
   
   ~LittlebotGuiPlugin() override = default;
 
+signals:
+  void writeText(const std::string &text);
+
 private:
   void initPlugin(qt_gui_cpp::PluginContext& context) override;
 
@@ -36,6 +39,7 @@ private:
   rclcpp::Node::SharedPtr node_;
 
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscriber_;
 
 };
 }  // namespace littlebot_gui_plugin
