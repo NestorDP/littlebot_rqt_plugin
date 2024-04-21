@@ -34,6 +34,10 @@ private:
 
   void sendCommand();
 
+  void createPublisher();
+
+  void createSubscriber();
+
   LittlebotGui * widget_;
 
   rclcpp::Node::SharedPtr node_;

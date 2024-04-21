@@ -20,7 +20,6 @@ void LittlebotGui::ButtonClicked()
 void LittlebotGui::writeText(const std::string &text)
 {
     ui_.textBrowser->append(QString::fromStdString(text));
-    // ui_.textBrowser->append("texto");
 }
 
 }  // namespace littlebot_gui_plugin

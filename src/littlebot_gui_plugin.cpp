@@ -19,18 +19,8 @@ LittlebotGuiPlugin::LittlebotGuiPlugin()
   connect(ros_spin_timer, &QTimer::timeout, this, &LittlebotGuiPlugin::handleSpinOnTimer);
   ros_spin_timer->start(500);
 
-  // publish to the topic littlebot_command
-  connect(widget_, &LittlebotGui::sendCommand, this, &LittlebotGuiPlugin::sendCommand);
-  publisher_ = node_->create_publisher<std_msgs::msg::String>("littlebot_command", 10);
-
-  // Subscriber to the topic littlebot_text
-  connect(this, &LittlebotGuiPlugin::writeText, widget_, &LittlebotGui::writeText);  
-  auto message_callback = [this](std_msgs::msg::String msg) -> void {
-    RCLCPP_INFO(node_->get_logger(), "I heard: '%s'", msg.data.c_str());
-    emit writeText(msg.data);};
-  subscriber_ =
-    node_->create_subscription<std_msgs::msg::String>("littlebot_text",
-      10, message_callback);
+  createPublisher();
+  createSubscriber();
 }
 
 void LittlebotGuiPlugin::initPlugin(qt_gui_cpp::PluginContext& context)
@@ -53,6 +43,23 @@ void LittlebotGuiPlugin::sendCommand()
   std_msgs::msg::String msg;
   msg.data = "Hello, world!";
   publisher_->publish(msg);
+}
+
+void LittlebotGuiPlugin::createPublisher()
+{
+  connect(widget_, &LittlebotGui::sendCommand, this, &LittlebotGuiPlugin::sendCommand);
+  publisher_ = node_->create_publisher<std_msgs::msg::String>("littlebot_command", 10);
+}
+
+void LittlebotGuiPlugin::createSubscriber()
+{
+  connect(this, &LittlebotGuiPlugin::writeText, widget_, &LittlebotGui::writeText);  
+  auto message_callback = [this](std_msgs::msg::String msg) -> void {
+    RCLCPP_INFO(node_->get_logger(), "I heard: '%s'", msg.data.c_str());
+    emit writeText(msg.data);};
+  subscriber_ =
+    node_->create_subscription<std_msgs::msg::String>("littlebot_text",
+      10, message_callback);
 }
 }  // namespace littlebot_gui_plugin
 
