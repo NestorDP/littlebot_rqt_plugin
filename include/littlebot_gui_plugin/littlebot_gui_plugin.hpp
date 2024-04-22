@@ -39,9 +39,7 @@ private:
   void createSubscriber();
 
   LittlebotGui * widget_;
-
   rclcpp::Node::SharedPtr node_;
-
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscriber_;
 
