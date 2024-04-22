@@ -42,8 +42,12 @@ set(${PROJECT_NAME}_INCLUDE_DIR
 qt5_wrap_cpp(${PROJECT_NAME}_LIB_MOC ${${PROJECT_NAME}_HEADERS})
 qt5_wrap_ui(${PROJECT_NAME}_UI_MOC ${${PROJECT_NAME}_QT_UI_SOURCES})
 
+set(QWT_INCLUDE_DIRS /usr/include/qwt)
+set(QWT_LIBRARIES /usr/lib/libqwt-qt5.so)
+
 include_directories(
   ${${PROJECT_NAME}_INCLUDE_DIRECTORIES}
+  ${QWT_INCLUDE_DIRS}
 )
 
 add_library(${PROJECT_NAME} SHARED
@@ -61,6 +65,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   ${qt_gui_cpp_LIBRARIES}
   ${rqt_gui_cpp_LIBRARIES}
   ${std_msgs_LIBRARIES}
+  ${QWT_LIBRARIES}
   Qt5::Widgets
 )
 

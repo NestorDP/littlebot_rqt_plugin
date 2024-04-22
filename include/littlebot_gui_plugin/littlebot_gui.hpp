@@ -4,7 +4,6 @@
 
 namespace littlebot_gui_plugin
 {
-
 class LittlebotGui : public QDialog
 {
     Q_OBJECT
