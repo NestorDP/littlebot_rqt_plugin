@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(littlebot_gui_plugin)
+project(littlebot_rqt_plugin)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 20)
@@ -17,12 +17,12 @@ find_package(pluginlib REQUIRED)
 
 
 set(${PROJECT_NAME}_SRCS
-  src/littlebot_gui_plugin.cpp
+  src/littlebot_rqt_plugin.cpp
   src/littlebot_gui.cpp
 )
 
 set(${PROJECT_NAME}_HEADERS
-  include/${PROJECT_NAME}/littlebot_gui_plugin.hpp
+  include/${PROJECT_NAME}/littlebot_rqt_plugin.hpp
   include/${PROJECT_NAME}/littlebot_gui.hpp
 )
 

@@ -2,7 +2,7 @@
 
 #include "ui_littlebot_gui.h"
 
-namespace littlebot_gui_plugin
+namespace littlebot_rqt_plugin
 {
 
 class LittlebotGui : public QDialog
@@ -26,4 +26,4 @@ private:
     void ButtonClicked();
 };
 
-}  // namespace littlebot_gui_plugin
+}  // namespace littlebot_rqt_plugin

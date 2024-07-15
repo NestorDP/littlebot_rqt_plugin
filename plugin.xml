@@ -1,5 +1,5 @@
-<library path="littlebot_gui_plugin">
-  <class name="littlebot_gui_plugin/LittlebotGuiPlugin" type="littlebot_gui_plugin::LittlebotGuiPlugin" base_class_type="rqt_gui_cpp::Plugin">
+<library path="littlebot_rqt_plugin">
+  <class name="littlebot_rqt_plugin/LittlebotRqtPlugin" type="littlebot_rqt_plugin::LittlebotRqtPlugin" base_class_type="rqt_gui_cpp::Plugin">
     <description>
       A gui to viewr datas from littlebot robot
     </description>

@@ -9,18 +9,18 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 
-#include "littlebot_gui_plugin/littlebot_gui.hpp"
+#include "littlebot_rqt_plugin/littlebot_gui.hpp"
 
-namespace littlebot_gui_plugin
+namespace littlebot_rqt_plugin
 {
-class LittlebotGuiPlugin : public rqt_gui_cpp::Plugin
+class LittlebotRqtPlugin : public rqt_gui_cpp::Plugin
 {
   Q_OBJECT
 
 public:
-  LittlebotGuiPlugin();
+  LittlebotRqtPlugin();
   
-  ~LittlebotGuiPlugin() override = default;
+  ~LittlebotRqtPlugin() override = default;
 
 signals:
   void writeText(const std::string &text);
@@ -44,4 +44,4 @@ private:
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscriber_;
 
 };
-}  // namespace littlebot_gui_plugin
+}  // namespace littlebot_rqt_plugin

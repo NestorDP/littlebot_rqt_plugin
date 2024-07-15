@@ -6,8 +6,8 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     gui_node = Node(
-        package="littlebot_gui",
-        executable="littlebot_gui",
+        package="littlebot_rqt_plugin",
+        executable="littlebot_rqt_plugin",
         name="littlebot_gui",
         output="screen",
     )
