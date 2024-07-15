@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "littlebot_gui_plugin/littlebot_gui.hpp"
+#include "littlebot_rqt_plugin/littlebot_gui.hpp"
 
-namespace littlebot_gui_plugin
+namespace littlebot_rqt_plugin
 {
 LittlebotGui::LittlebotGui(QWidget *parent)
     : QDialog(parent)
@@ -21,4 +21,4 @@ void LittlebotGui::writeText(const std::string &text)
     ui_.textBrowser->append(QString::fromStdString(text));
 }
 
-}  // namespace littlebot_gui_plugin
+}  // namespace littlebot_rqt_plugin
