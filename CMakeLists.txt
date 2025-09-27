@@ -14,6 +14,7 @@ find_package(rqt_gui_cpp REQUIRED)
 find_package(Qt5 REQUIRED COMPONENTS Widgets)
 find_package(qt_gui_cpp REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(std_msgs REQUIRED)
 
 
 set(${PROJECT_NAME}_SRCS
@@ -75,6 +76,7 @@ ament_target_dependencies(${PROJECT_NAME} PUBLIC
   Qt5Widgets
   rclcpp
   rqt_gui_cpp
+  std_msgs
 )
 
 install(

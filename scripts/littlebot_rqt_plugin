@@ -6,7 +6,7 @@ from rqt_gui.main import Main
 
 
 def main(argv=sys.argv):
-    plugin = 'littlebot_gui_plugin'
+    plugin = 'littlebot_rqt_plugin/LittlebotRqtPlugin'
     main = Main(filename=plugin)
     sys.exit(main.main(standalone=plugin, plugin_argument_provider=None))
 

@@ -10,5 +10,6 @@ def generate_launch_description():
         executable="littlebot_rqt_plugin",
         name="littlebot_gui",
         output="screen",
+        arguments=["--force-discover"],
     )
     return LaunchDescription([gui_node])
