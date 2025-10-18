@@ -68,7 +68,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   ${rqt_gui_cpp_LIBRARIES}
   ${std_msgs_LIBRARIES}
   ${QWT_LIBRARIES}
-  ${LIBSERIAL_LIBRARIES}
+  PkgConfig::LIBSERIAL
   Qt5::Widgets
 )
 
