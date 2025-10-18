@@ -5,6 +5,7 @@
  * please visit: https://github.com/NestorDP/cppserial
  */
 #include "libserial/ports.hpp"
+#include "libserial/device.hpp"
 
 #include "ui_littlebot_gui.h"
 
@@ -35,6 +36,10 @@ private:
     void sendCommandButtonClicked();
 
     libserial::Ports available_devices_;
+
+    int selected_device_index_{-1};
+
+    int current_number_of_devices_{0};
 };
 
 }  // namespace littlebot_rqt_plugin

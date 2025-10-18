@@ -9,8 +9,21 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     : QDialog(parent)
 {
     ui_.setupUi(this);
-    this->updateAvailableDevices();
+    // this->updateAvailableDevices();
     connect(ui_.push_set_cmd, &QPushButton::clicked, this, &LittlebotGui::sendCommandButtonClicked);
+
+    ui_.combo_dev_serial_available->addItem("Select a device");
+    auto n_ports = available_devices_.scanPorts();
+    for (uint16_t i = 0; i <= n_ports; ++i) {
+        auto name = available_devices_.findName(i);
+        auto port_path = available_devices_.findPortPath(i);
+        ui_.combo_dev_serial_available->insertItem(i + 1, QString::fromStdString(*name));
+    }
+    
+
+    connect(ui_.combo_dev_serial_available, QOverload<int>::of(&QComboBox::activated), 
+        [this](int index) {this->updateAvailableDevices();
+    });
 }
 
 void LittlebotGui::sendCommandButtonClicked()
@@ -25,14 +38,16 @@ void LittlebotGui::littlebotCommand(const std::string &text)
 
 void LittlebotGui::updateAvailableDevices()
 {
+    auto number_of_devices = available_devices_.scanPorts();
+    if(number_of_devices == current_number_of_devices_) {
+        return;
+    }
+    current_number_of_devices_ = number_of_devices;
     ui_.combo_dev_serial_available->clear();
-
-    auto n_ports = available_devices_.scanPorts();
-
-    for (uint16_t i = 0; i <= n_ports; ++i) {
-        auto name = available_devices_.findName(i);
-        auto port_path = available_devices_.findPortPath(i);
-        ui_.combo_dev_serial_available->addItem(QString::fromStdString(*name));
+    std::vector<libserial::Device> devices;
+    available_devices_.getDevices(devices);
+    for (const auto& device : devices) {
+        ui_.combo_dev_serial_available->insertItem(device.getId() + 1, QString::fromStdString(device.getName()));
     }
 }
 
