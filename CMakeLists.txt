@@ -16,6 +16,10 @@ find_package(qt_gui_cpp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(std_msgs REQUIRED)
 
+# Find libserial using pkg-config
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBSERIAL REQUIRED IMPORTED_TARGET libserial)
+
 
 set(${PROJECT_NAME}_SRCS
   src/littlebot_rqt_plugin.cpp
@@ -46,11 +50,6 @@ qt5_wrap_ui(${PROJECT_NAME}_UI_MOC ${${PROJECT_NAME}_QT_UI_SOURCES})
 set(QWT_INCLUDE_DIRS /usr/include/qwt)
 set(QWT_LIBRARIES /usr/lib/libqwt-qt5.so)
 
-include_directories(
-  ${${PROJECT_NAME}_INCLUDE_DIRECTORIES}
-  ${QWT_INCLUDE_DIRS}
-)
-
 add_library(${PROJECT_NAME} SHARED
   ${${PROJECT_NAME}_SRCS}
   ${${PROJECT_NAME}_LIB_MOC}
@@ -59,6 +58,8 @@ add_library(${PROJECT_NAME} SHARED
 
 target_include_directories(${PROJECT_NAME} PUBLIC
   ${${PROJECT_NAME}_INCLUDE_DIR}
+  ${LIBSERIAL_INCLUDE_DIRS}
+  ${QWT_INCLUDE_DIRS}
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
@@ -67,6 +68,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   ${rqt_gui_cpp_LIBRARIES}
   ${std_msgs_LIBRARIES}
   ${QWT_LIBRARIES}
+  ${LIBSERIAL_LIBRARIES}
   Qt5::Widgets
 )
 

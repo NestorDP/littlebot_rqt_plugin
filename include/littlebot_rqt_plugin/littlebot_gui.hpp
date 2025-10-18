@@ -4,7 +4,7 @@
  * To more information about the serial library used,
  * please visit: https://github.com/NestorDP/cppserial
  */
-#include "libserial/serial.hpp"
+#include "libserial/ports.hpp"
 
 #include "ui_littlebot_gui.h"
 
