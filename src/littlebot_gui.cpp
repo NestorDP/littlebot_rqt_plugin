@@ -8,17 +8,17 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     : QDialog(parent)
 {
     ui_.setupUi(this);
-    connect(ui_.pushButton, &QPushButton::clicked, this, &LittlebotGui::ButtonClicked);
+    connect(ui_.push_set_cmd, &QPushButton::clicked, this, &LittlebotGui::sendCommandButtonClicked);
 }
 
-void LittlebotGui::ButtonClicked()
+void LittlebotGui::sendCommandButtonClicked()
 {
-    sendCommand();
+    littlebotStatus();
 }
 
-void LittlebotGui::writeText(const std::string &text)
+void LittlebotGui::littlebotCommand(const std::string &text)
 {
-    ui_.textBrowser->append(QString::fromStdString(text));
+    // ui_.textBrowser->append(QString::fromStdString(text));
 }
 
 }  // namespace littlebot_rqt_plugin

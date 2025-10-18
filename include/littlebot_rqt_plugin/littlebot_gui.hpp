@@ -1,5 +1,11 @@
 #pragma once
 
+/**
+ * To more information about the serial library used,
+ * please visit: https://github.com/NestorDP/cppserial
+ */
+#include "libserial/serial.hpp"
+
 #include "ui_littlebot_gui.h"
 
 namespace littlebot_rqt_plugin
@@ -14,15 +20,19 @@ public:
     ~LittlebotGui() override = default;
 
 signals:
-    void sendCommand();
+    void littlebotStatus();
 
 public slots:
-    void writeText(const std::string &text);
+    void littlebotCommand(const std::string &text);
 
 private:
     Ui::LittlebotGui ui_;
 
-    void ButtonClicked();
+    void getStatusButtonClicked();
+
+    void sendCommandButtonClicked();
+
+    libserial::Ports devices_;
 };
 
 }  // namespace littlebot_rqt_plugin

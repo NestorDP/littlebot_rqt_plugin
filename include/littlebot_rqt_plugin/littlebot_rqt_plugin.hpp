@@ -23,16 +23,16 @@ public:
   ~LittlebotRqtPlugin() override = default;
 
 signals:
-  void writeText(const std::string &text);
+  void littlebotCommand(const std::string &text);
 
 private:
   void initPlugin(qt_gui_cpp::PluginContext& context) override;
 
   void handleSpinOnTimer();
 
-  void shutdownPlugin() ;
+  void shutdownPlugin();
 
-  void sendCommand();
+  void littlebotStatus();
 
   void createPublisher();
 

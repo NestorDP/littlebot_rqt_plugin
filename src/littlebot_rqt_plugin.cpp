@@ -38,7 +38,7 @@ void LittlebotRqtPlugin::shutdownPlugin()
   node_.reset();
 }
 
-void LittlebotRqtPlugin::sendCommand()
+void LittlebotRqtPlugin::littlebotStatus()
 {
   std_msgs::msg::String msg;
   msg.data = "Hello, world!";
@@ -47,16 +47,17 @@ void LittlebotRqtPlugin::sendCommand()
 
 void LittlebotRqtPlugin::createPublisher()
 {
-  connect(widget_, &LittlebotGui::sendCommand, this, &LittlebotRqtPlugin::sendCommand);
+  connect(widget_, &LittlebotGui::littlebotStatus, this, &LittlebotRqtPlugin::littlebotStatus);
   publisher_ = node_->create_publisher<std_msgs::msg::String>("littlebot_command", 10);
 }
 
 void LittlebotRqtPlugin::createSubscriber()
 {
-  connect(this, &LittlebotRqtPlugin::writeText, widget_, &LittlebotGui::writeText);  
+  connect(this, &LittlebotRqtPlugin::littlebotCommand, widget_, &LittlebotGui::littlebotCommand);
   auto message_callback = [this](std_msgs::msg::String msg) -> void {
     RCLCPP_INFO(node_->get_logger(), "I heard: '%s'", msg.data.c_str());
-    emit writeText(msg.data);};
+    emit littlebotCommand(msg.data);
+  };
   subscriber_ =
     node_->create_subscription<std_msgs::msg::String>("littlebot_text",
       10, message_callback);
