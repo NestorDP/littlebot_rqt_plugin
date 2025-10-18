@@ -37,11 +37,15 @@ private:
 
     void sendCommandButtonClicked();
 
+    void hardwareConnection();
+
     libserial::Ports available_devices_;
 
     int selected_device_index_{-1};
 
     int current_number_of_devices_{0};
+
+    std::shared_ptr<littlebot_base::LittlebotDriver> littlebot_driver_;
 };
 
 }  // namespace littlebot_rqt_plugin

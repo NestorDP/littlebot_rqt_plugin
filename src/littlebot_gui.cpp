@@ -16,6 +16,7 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     // this->updateAvailableDevices();
     connect(ui_.push_set_cmd, &QPushButton::clicked, this, &LittlebotGui::sendCommandButtonClicked);
     connect(ui_.push_get_status, &QPushButton::clicked, this, &LittlebotGui::getStatusButtonClicked);
+    connect(ui_.push_connect, &QPushButton::clicked, this, &LittlebotGui::hardwareConnection);
 
     ui_.combo_dev_serial_available->addItem("Select a device");
     auto n_ports = available_devices_.scanPorts();
@@ -94,6 +95,12 @@ void LittlebotGui::updateAvailableDevices()
     for (const auto& device : devices) {
         ui_.combo_dev_serial_available->insertItem(device.getId() + 1, QString::fromStdString(device.getName()));
     }
+}
+
+void LittlebotGui::hardwareConnection()
+{
+    auto serial_port = std::make_shared<littlebot_base::SerialPort>();
+    littlebot_driver_ = std::make_shared<littlebot_base::LittlebotDriver>(serial_port, "/dev/rfcomm0", 115200);
 }
 
 }  // namespace littlebot_rqt_plugin
