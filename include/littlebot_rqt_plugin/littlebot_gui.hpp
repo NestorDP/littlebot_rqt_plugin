@@ -19,6 +19,8 @@ public:
 
     ~LittlebotGui() override = default;
 
+    void updateAvailableDevices();
+
 signals:
     void littlebotStatus();
 
@@ -32,7 +34,7 @@ private:
 
     void sendCommandButtonClicked();
 
-    libserial::Ports devices_;
+    libserial::Ports available_devices_;
 };
 
 }  // namespace littlebot_rqt_plugin
