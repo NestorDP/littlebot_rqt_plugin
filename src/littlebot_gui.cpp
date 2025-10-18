@@ -1,7 +1,11 @@
 #include <iostream>
 #include <cstdint>
+#include <stdexcept>
+#include <QMessageBox>
 
 #include "littlebot_rqt_plugin/littlebot_gui.hpp"
+#include "littlebot_base/littlebot_driver.hpp"
+#include "littlebot_base/serial_port.hpp"
 
 namespace littlebot_rqt_plugin
 {
@@ -11,6 +15,7 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     ui_.setupUi(this);
     // this->updateAvailableDevices();
     connect(ui_.push_set_cmd, &QPushButton::clicked, this, &LittlebotGui::sendCommandButtonClicked);
+    connect(ui_.push_get_status, &QPushButton::clicked, this, &LittlebotGui::getStatusButtonClicked);
 
     ui_.combo_dev_serial_available->addItem("Select a device");
     auto n_ports = available_devices_.scanPorts();
@@ -29,6 +34,46 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 void LittlebotGui::sendCommandButtonClicked()
 {
     littlebotStatus();
+}
+
+void LittlebotGui::getStatusButtonClicked()
+{
+    // Try to construct a LittlebotDriver with the selected device and report result
+    int idx = ui_.combo_dev_serial_available->currentIndex();
+    if (idx <= 0) {  // 0 is the placeholder "Select a device"
+        QMessageBox msgBox(QMessageBox::Warning, "LittleBot", "Please select a device", QMessageBox::Ok, this);
+        msgBox.exec();
+        return;
+    }
+
+    // Our combo has a placeholder at index 0, so device index is (idx - 1)
+    auto device_index = static_cast<uint16_t>(idx - 1);
+    auto n_ports = available_devices_.scanPorts();
+    if (device_index >= n_ports) {
+        QMessageBox msgBox(QMessageBox::Warning, "LittleBot", "Selected device index is out of range", QMessageBox::Ok, this);
+        msgBox.exec();
+        return;
+    }
+
+    auto port_path_opt = available_devices_.findPortPath(device_index);
+    if (!port_path_opt.has_value()) {
+        QMessageBox msgBox(QMessageBox::Critical, "LittleBot", "Could not resolve port path for selected device", QMessageBox::Ok, this);
+        msgBox.exec();
+        return;
+    }
+
+    try {
+        auto serial = std::make_shared<littlebot_base::SerialPort>();
+        // Try to build the driver and open the port (driver opens in constructor)
+        littlebot_base::LittlebotDriver driver(serial, *port_path_opt, 115200);
+        QMessageBox msgBox(QMessageBox::Information, "LittleBot", "Driver initialized successfully!", QMessageBox::Ok, this);
+        msgBox.exec();
+    } catch (const std::exception &ex) {
+        QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Driver initialization failed: ") + ex.what(), QMessageBox::Ok, this);
+        msgBox.exec();
+    }
+
+    emit littlebotStatus();
 }
 
 void LittlebotGui::littlebotCommand(const std::string &text)

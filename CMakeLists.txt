@@ -15,6 +15,7 @@ find_package(Qt5 REQUIRED COMPONENTS Widgets)
 find_package(qt_gui_cpp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(littlebot_base REQUIRED)
 
 # Find libserial using pkg-config
 find_package(PkgConfig REQUIRED)
@@ -60,6 +61,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${${PROJECT_NAME}_INCLUDE_DIR}
   ${LIBSERIAL_INCLUDE_DIRS}
   ${QWT_INCLUDE_DIRS}
+  ${littlebot_base_INCLUDE_DIRS}
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
@@ -79,6 +81,7 @@ ament_target_dependencies(${PROJECT_NAME} PUBLIC
   rclcpp
   rqt_gui_cpp
   std_msgs
+  littlebot_base
 )
 
 install(

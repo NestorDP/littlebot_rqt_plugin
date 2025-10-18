@@ -7,6 +7,8 @@
 #include "libserial/ports.hpp"
 #include "libserial/device.hpp"
 
+#include "littlebot_base/littlebot_driver.hpp"
+
 #include "ui_littlebot_gui.h"
 
 namespace littlebot_rqt_plugin
