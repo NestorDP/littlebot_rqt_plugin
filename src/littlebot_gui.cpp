@@ -1,3 +1,18 @@
+// @ Copyright 2023-2025 Nestor Neto
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #include <iostream>
 #include <cstdint>
 #include <stdexcept>
@@ -13,10 +28,9 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     : QDialog(parent)
 {
     ui_.setupUi(this);
-    // this->updateAvailableDevices();
     connect(ui_.push_set_cmd, &QPushButton::clicked, this, &LittlebotGui::sendCommand);
     connect(ui_.push_get_status, &QPushButton::clicked, this, &LittlebotGui::getStatus);
-    connect(ui_.push_connect, &QPushButton::clicked, this, &LittlebotGui::connecteHardware);
+    connect(ui_.push_connect, &QPushButton::clicked, this, &LittlebotGui::connectHardware);
 
     this->updateAvailableDevices();
 
@@ -67,7 +81,7 @@ void LittlebotGui::updateAvailableDevices()
     }
 }
 
-void LittlebotGui::connecteHardware()
+void LittlebotGui::connectHardware()
 {
     try {
         auto serial_port = std::make_shared<littlebot_base::SerialPort>();
