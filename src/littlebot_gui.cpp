@@ -14,66 +14,24 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 {
     ui_.setupUi(this);
     // this->updateAvailableDevices();
-    connect(ui_.push_set_cmd, &QPushButton::clicked, this, &LittlebotGui::sendCommandButtonClicked);
-    connect(ui_.push_get_status, &QPushButton::clicked, this, &LittlebotGui::getStatusButtonClicked);
-    connect(ui_.push_connect, &QPushButton::clicked, this, &LittlebotGui::hardwareConnection);
+    connect(ui_.push_set_cmd, &QPushButton::clicked, this, &LittlebotGui::sendCommand);
+    connect(ui_.push_get_status, &QPushButton::clicked, this, &LittlebotGui::getStatus);
+    connect(ui_.push_connect, &QPushButton::clicked, this, &LittlebotGui::connecteHardware);
 
-    ui_.combo_dev_serial_available->addItem("Select a device");
-    auto n_ports = available_devices_.scanPorts();
-    for (uint16_t i = 0; i <= n_ports; ++i) {
-        auto name = available_devices_.findName(i);
-        auto port_path = available_devices_.findPortPath(i);
-        ui_.combo_dev_serial_available->insertItem(i + 1, QString::fromStdString(*name));
-    }
-    
+    this->updateAvailableDevices();
 
-    connect(ui_.combo_dev_serial_available, QOverload<int>::of(&QComboBox::activated), 
+    connect(ui_.combo_dev_serial_available, QOverload<int>::of(&QComboBox::activated),
         [this](int index) {this->updateAvailableDevices();
     });
 }
 
-void LittlebotGui::sendCommandButtonClicked()
+void LittlebotGui::sendCommand()
 {
-    littlebotStatus();
+    emit littlebotStatus();
 }
 
-void LittlebotGui::getStatusButtonClicked()
+void LittlebotGui::getStatus()
 {
-    // Try to construct a LittlebotDriver with the selected device and report result
-    int idx = ui_.combo_dev_serial_available->currentIndex();
-    if (idx <= 0) {  // 0 is the placeholder "Select a device"
-        QMessageBox msgBox(QMessageBox::Warning, "LittleBot", "Please select a device", QMessageBox::Ok, this);
-        msgBox.exec();
-        return;
-    }
-
-    // Our combo has a placeholder at index 0, so device index is (idx - 1)
-    auto device_index = static_cast<uint16_t>(idx - 1);
-    auto n_ports = available_devices_.scanPorts();
-    if (device_index >= n_ports) {
-        QMessageBox msgBox(QMessageBox::Warning, "LittleBot", "Selected device index is out of range", QMessageBox::Ok, this);
-        msgBox.exec();
-        return;
-    }
-
-    auto port_path_opt = available_devices_.findPortPath(device_index);
-    if (!port_path_opt.has_value()) {
-        QMessageBox msgBox(QMessageBox::Critical, "LittleBot", "Could not resolve port path for selected device", QMessageBox::Ok, this);
-        msgBox.exec();
-        return;
-    }
-
-    try {
-        auto serial = std::make_shared<littlebot_base::SerialPort>();
-        // Try to build the driver and open the port (driver opens in constructor)
-        littlebot_base::LittlebotDriver driver(serial, *port_path_opt, 115200);
-        QMessageBox msgBox(QMessageBox::Information, "LittleBot", "Driver initialized successfully!", QMessageBox::Ok, this);
-        msgBox.exec();
-    } catch (const std::exception &ex) {
-        QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Driver initialization failed: ") + ex.what(), QMessageBox::Ok, this);
-        msgBox.exec();
-    }
-
     emit littlebotStatus();
 }
 
@@ -85,6 +43,18 @@ void LittlebotGui::littlebotCommand(const std::string &text)
 void LittlebotGui::updateAvailableDevices()
 {
     auto number_of_devices = available_devices_.scanPorts();
+    auto selected_device_id = ui_.combo_dev_serial_available->currentIndex();
+    if(selected_device_id < 0) {
+        selected_device_id = 0;
+    }
+
+    auto port_path_opt = available_devices_.findPortPath(static_cast<uint16_t>(selected_device_id));
+    if (port_path_opt.has_value()) {
+        ui_.label_device_port->setText(QString::fromStdString(*port_path_opt));
+    } else {
+        ui_.label_device_port->setText("Unknown");
+    }
+
     if(number_of_devices == current_number_of_devices_) {
         return;
     }
@@ -93,14 +63,22 @@ void LittlebotGui::updateAvailableDevices()
     std::vector<libserial::Device> devices;
     available_devices_.getDevices(devices);
     for (const auto& device : devices) {
-        ui_.combo_dev_serial_available->insertItem(device.getId() + 1, QString::fromStdString(device.getName()));
+        ui_.combo_dev_serial_available->addItem(QString::fromStdString(device.getName()));
     }
 }
 
-void LittlebotGui::hardwareConnection()
+void LittlebotGui::connecteHardware()
 {
-    auto serial_port = std::make_shared<littlebot_base::SerialPort>();
-    littlebot_driver_ = std::make_shared<littlebot_base::LittlebotDriver>(serial_port, "/dev/rfcomm0", 115200);
+    try {
+        auto serial_port = std::make_shared<littlebot_base::SerialPort>();
+        auto port_path = ui_.label_device_port->text().toStdString();
+        littlebot_driver_ = std::make_shared<littlebot_base::LittlebotDriver>(serial_port, port_path, 115200);
+        QMessageBox msgBox(QMessageBox::Information, "LittleBot", "Connected to device successfully!", QMessageBox::Ok, this);
+        msgBox.exec();
+    } catch (const std::exception &ex) {
+        QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Connection failed: ") + ex.what(), QMessageBox::Ok, this);
+        msgBox.exec();
+    }
 }
 
 }  // namespace littlebot_rqt_plugin

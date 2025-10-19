@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>381</width>
+    <width>503</width>
     <height>228</height>
    </rect>
   </property>
@@ -164,9 +164,9 @@
   <widget class="QLabel" name="label_device_port">
    <property name="geometry">
     <rect>
-     <x>70</x>
+     <x>60</x>
      <y>50</y>
-     <width>66</width>
+     <width>271</width>
      <height>19</height>
     </rect>
    </property>

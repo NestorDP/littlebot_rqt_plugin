@@ -33,15 +33,15 @@ public slots:
 private:
     Ui::LittlebotGui ui_;
 
-    void getStatusButtonClicked();
+    void getStatus();
 
-    void sendCommandButtonClicked();
+    void sendCommand();
 
-    void hardwareConnection();
+    void connecteHardware();
 
     libserial::Ports available_devices_;
 
-    int selected_device_index_{-1};
+    uint16_t selected_device_index_{0};
 
     int current_number_of_devices_{0};
 
