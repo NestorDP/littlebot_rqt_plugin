@@ -56,28 +56,37 @@ void LittlebotGui::littlebotCommand(const std::string &text)
 
 void LittlebotGui::updateAvailableDevices()
 {
-    auto number_of_devices = available_devices_.scanPorts();
-    auto selected_device_id = ui_.combo_dev_serial_available->currentIndex();
-    if(selected_device_id < 0) {
-        selected_device_id = 0;
-    }
+    try{
+        auto number_of_devices = available_devices_.scanPorts();
+        auto selected_device_id = ui_.combo_dev_serial_available->currentIndex();
+        if(selected_device_id < 0) {
+            selected_device_id = 0;
+        }
 
-    auto port_path_opt = available_devices_.findPortPath(static_cast<uint16_t>(selected_device_id));
-    if (port_path_opt.has_value()) {
-        ui_.label_device_port->setText(QString::fromStdString(*port_path_opt));
-    } else {
+        auto port_path_opt = available_devices_.findPortPath(static_cast<uint16_t>(selected_device_id));
+        if (port_path_opt.has_value()) {
+            ui_.label_device_port->setText(QString::fromStdString(*port_path_opt));
+        } else {
+            ui_.label_device_port->setText("Unknown");
+        }
+
+        if(number_of_devices == current_number_of_devices_) {
+            return;
+        }
+        current_number_of_devices_ = number_of_devices;
+        ui_.combo_dev_serial_available->clear();
+        std::vector<libserial::Device> devices;
+        available_devices_.getDevices(devices);
+        for (const auto& device : devices) {
+            ui_.combo_dev_serial_available->addItem(QString::fromStdString(device.getName()));
+        }
+    } catch (const std::exception &ex) {
+        current_number_of_devices_ = -1;
+        ui_.combo_dev_serial_available->clear();
+        ui_.combo_dev_serial_available->addItem("Unknown");
         ui_.label_device_port->setText("Unknown");
-    }
-
-    if(number_of_devices == current_number_of_devices_) {
-        return;
-    }
-    current_number_of_devices_ = number_of_devices;
-    ui_.combo_dev_serial_available->clear();
-    std::vector<libserial::Device> devices;
-    available_devices_.getDevices(devices);
-    for (const auto& device : devices) {
-        ui_.combo_dev_serial_available->addItem(QString::fromStdString(device.getName()));
+        QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Failed to update devices: ") + ex.what(), QMessageBox::Ok, this);
+        msgBox.exec();
     }
 }
 
@@ -87,12 +96,13 @@ void LittlebotGui::connectHardware()
         auto serial_port = std::make_shared<littlebot_base::SerialPort>();
         auto port_path = ui_.label_device_port->text().toStdString();
         littlebot_driver_ = std::make_shared<littlebot_base::LittlebotDriver>(serial_port, port_path, 115200);
-        QMessageBox msgBox(QMessageBox::Information, "LittleBot", "Connected to device successfully!", QMessageBox::Ok, this);
-        msgBox.exec();
     } catch (const std::exception &ex) {
         QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Connection failed: ") + ex.what(), QMessageBox::Ok, this);
         msgBox.exec();
+        return;
     }
+    QMessageBox msgBox(QMessageBox::Information, "LittleBot", "Connected to device successfully!", QMessageBox::Ok, this);
+    msgBox.exec();
 }
 
 }  // namespace littlebot_rqt_plugin
