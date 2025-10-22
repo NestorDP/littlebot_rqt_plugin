@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>727</width>
+    <width>404</width>
     <height>228</height>
    </rect>
   </property>
@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Set Command</string>
+    <string>Send Command</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="edit_left_cmd">
@@ -130,7 +130,7 @@
     <rect>
      <x>20</x>
      <y>10</y>
-     <width>201</width>
+     <width>251</width>
      <height>27</height>
     </rect>
    </property>
@@ -138,7 +138,7 @@
   <widget class="QPushButton" name="push_connect">
    <property name="geometry">
     <rect>
-     <x>220</x>
+     <x>270</x>
      <y>10</y>
      <width>121</width>
      <height>27</height>
@@ -184,33 +184,33 @@
     </rect>
    </property>
    <property name="text">
-    <string>velocity cmd</string>
+    <string>cammand vel:</string>
    </property>
   </widget>
   <widget class="QLabel" name="left_lable_3">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>30</x>
      <y>150</y>
-     <width>101</width>
+     <width>71</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>velocity sta</string>
+    <string>status vel:</string>
    </property>
   </widget>
   <widget class="QLabel" name="left_lable_4">
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>30</x>
      <y>180</y>
-     <width>101</width>
+     <width>81</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>position sta</string>
+    <string>status pos:</string>
    </property>
   </widget>
  </widget>

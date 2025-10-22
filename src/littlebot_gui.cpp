@@ -46,12 +46,29 @@ void LittlebotGui::sendCommand()
 
 void LittlebotGui::getStatus()
 {
-    emit littlebotStatus();
-}
+    littlebot_driver_->sendData('S');
+    littlebot_driver_->receiveData();
+    auto status_positions = littlebot_driver_->getStatusPositions();
+    auto status_velocities = littlebot_driver_->getStatusVelocities();
 
-void LittlebotGui::littlebotCommand(const std::string &text)
-{
-    // ui_.textBrowser->append(QString::fromStdString(text));
+    ui_.lcd_left_pos_status->display(
+        QString::number(status_positions["left_wheel"]));
+    ui_.lcd_right_pos_status->display(
+        QString::number(status_positions["right_wheel"]));
+
+    ui_.lcd_left_vel_status->display(
+        QString::number(status_velocities["left_wheel"]));
+    ui_.lcd_right_vel_status->display(
+        QString::number(status_velocities["right_wheel"]));
+
+    for (const auto& [joint, position] : status_positions) {
+        std::cout << "Position - " << joint << ": " << position << std::endl;
+    }
+    for (const auto& [joint, velocity] : status_velocities) {
+        std::cout << "Velocity - " << joint << ": " << velocity << std::endl;
+    }
+
+    emit littlebotStatus();
 }
 
 void LittlebotGui::updateAvailableDevices()
@@ -95,6 +112,7 @@ void LittlebotGui::connectHardware()
     try {
         auto serial_port = std::make_shared<littlebot_base::SerialPort>();
         auto port_path = ui_.label_device_port->text().toStdString();
+        
         littlebot_driver_ = std::make_shared<littlebot_base::LittlebotDriver>(serial_port, port_path, 115200);
     } catch (const std::exception &ex) {
         QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Connection failed: ") + ex.what(), QMessageBox::Ok, this);
@@ -103,6 +121,11 @@ void LittlebotGui::connectHardware()
     }
     QMessageBox msgBox(QMessageBox::Information, "LittleBot", "Connected to device successfully!", QMessageBox::Ok, this);
     msgBox.exec();
+}
+
+void LittlebotGui::littlebotCommand(const std::string &text)
+{
+    // ui_.textBrowser->append(QString::fromStdString(text));
 }
 
 }  // namespace littlebot_rqt_plugin
