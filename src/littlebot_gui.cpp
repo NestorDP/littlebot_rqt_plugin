@@ -29,7 +29,7 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 {
     ui_.setupUi(this);
     connect(ui_.push_set_cmd, &QPushButton::clicked, this, &LittlebotGui::sendCommand);
-    connect(ui_.push_get_status, &QPushButton::clicked, this, &LittlebotGui::getStatus);
+    connect(ui_.push_get_status, &QPushButton::clicked, this, &LittlebotGui::updateStatusDisplay);
     connect(ui_.push_connect, &QPushButton::clicked, this, &LittlebotGui::connectHardware);
 
     this->updateAvailableDevices();
@@ -51,27 +51,9 @@ void LittlebotGui::getStatus()
             throw std::runtime_error("Not connected to hardware");
         }
         littlebot_driver_->sendData('S');
-        std::cout << "Requesting status..." << std::endl;
         littlebot_driver_->receiveData();
-        auto status_positions = littlebot_driver_->getStatusPositions();
-        auto status_velocities = littlebot_driver_->getStatusVelocities();
-
-        ui_.lcd_left_pos_status->display(
-            QString::number(status_positions["left_wheel"], 'f', 2));
-        ui_.lcd_right_pos_status->display(
-            QString::number(status_positions["right_wheel"], 'f', 2));
-
-        ui_.lcd_left_vel_status->display(
-            QString::number(status_velocities["left_wheel"], 'f', 2));
-        ui_.lcd_right_vel_status->display(
-            QString::number(status_velocities["right_wheel"], 'f', 2));
-
-        for (const auto& [joint, position] : status_positions) {
-            std::cout << "Position - " << joint << ": " << position << std::endl;
-        }
-        for (const auto& [joint, velocity] : status_velocities) {
-            std::cout << "Velocity - " << joint << ": " << velocity << std::endl;
-        }
+        status_positions_ = littlebot_driver_->getStatusPositions();
+        status_velocities_ = littlebot_driver_->getStatusVelocities();
     } catch (const std::exception &ex) {
         QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Failed to get status: ") + ex.what(), QMessageBox::Ok, this);
         msgBox.exec();
@@ -112,6 +94,24 @@ void LittlebotGui::updateAvailableDevices()
         ui_.combo_dev_serial_available->addItem("Unknown");
         ui_.label_device_port->setText("Unknown");
         QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Failed to update devices: ") + ex.what(), QMessageBox::Ok, this);
+        msgBox.exec();
+    }
+}
+
+void LittlebotGui::updateStatusDisplay()
+{
+    this->getStatus();
+    try {
+        ui_.lcd_left_pos_status->display(
+            QString::number(status_positions_["left_wheel"], 'f', 2));
+        ui_.lcd_right_pos_status->display(
+            QString::number(status_positions_["right_wheel"], 'f', 2));
+        ui_.lcd_left_vel_status->display(
+            QString::number(status_velocities_["left_wheel"], 'f', 2));
+        ui_.lcd_right_vel_status->display(
+            QString::number(status_velocities_["right_wheel"], 'f', 2));
+    } catch (const std::exception &ex) {
+        QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Failed to update status display: ") + ex.what(), QMessageBox::Ok, this);
         msgBox.exec();
     }
 }

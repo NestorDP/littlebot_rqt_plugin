@@ -53,6 +53,11 @@ public:
      */
     void updateAvailableDevices();
 
+    /**
+     * @brief Update the status display in the GUI
+     */
+    void updateStatusDisplay();
+
 signals:
     /**
      * @brief Signal emitted when Littlebot status is requested
@@ -106,6 +111,21 @@ private:
      * @brief Shared pointer to the Littlebot driver
      */
     std::shared_ptr<littlebot_base::LittlebotDriver> littlebot_driver_;
+
+    std::map<std::string, float> command_velocities_{
+        {"left_wheel", 0.0f},
+        {"right_wheel", 0.0f}
+    };
+
+    std::map<std::string, float> status_positions_{
+        {"left_wheel", 0.0f},
+        {"right_wheel", 0.0f}
+    };
+
+    std::map<std::string, float> status_velocities_{
+        {"left_wheel", 0.0f},
+        {"right_wheel", 0.0f}
+    };
 };
 
 }  // namespace littlebot_rqt_plugin
