@@ -57,6 +57,10 @@ add_library(${PROJECT_NAME} SHARED
   ${${PROJECT_NAME}_UI_MOC}
 )
 
+# Qwt is not fully compatible with C++20 in some system packages; build this target with C++17
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
+
 target_include_directories(${PROJECT_NAME} PUBLIC
   ${${PROJECT_NAME}_INCLUDE_DIR}
   ${LIBSERIAL_INCLUDE_DIRS}

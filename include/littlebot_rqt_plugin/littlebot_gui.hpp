@@ -26,6 +26,12 @@
 
 #include "ui_littlebot_gui.h"
 
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
+#include <qwt_legend.h>
+#include <QVector>
+#include <QThread> // for QThread::msleep
+
 namespace littlebot_rqt_plugin
 {
 /**
@@ -57,6 +63,9 @@ public:
      * @brief Update the status display in the GUI
      */
     void updateStatusDisplay();
+
+
+    void updatePlots();
 
 signals:
     /**
@@ -126,6 +135,8 @@ private:
         {"left_wheel", 0.0f},
         {"right_wheel", 0.0f}
     };
+
+    QwtPlotCurve *curve_;
 };
 
 }  // namespace littlebot_rqt_plugin

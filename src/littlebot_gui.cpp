@@ -37,6 +37,8 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     connect(ui_.combo_dev_serial_available, QOverload<int>::of(&QComboBox::activated),
         [this](int index) {this->updateAvailableDevices();
     });
+
+    this->updatePlots();
 }
 
 void LittlebotGui::sendCommand()
@@ -116,6 +118,39 @@ void LittlebotGui::updateStatusDisplay()
     }
 }
 
+void LittlebotGui::updatePlots()
+{
+    ui_.qwt_plot->setTitle("Simple QwtPlot Update Example");
+    ui_.qwt_plot->setAxisTitle(QwtPlot::xBottom, "Index");
+    ui_.qwt_plot->setAxisTitle(QwtPlot::yLeft, "Value");
+
+    curve_ = new QwtPlotCurve();
+    curve_->attach(ui_.qwt_plot);
+    curve_->setPen(Qt::blue, 2);
+    curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+
+    // ---- Simple test data ----
+    QVector<double> yValues = {1, 2, 3, 4, 5};
+    QVector<double> xValues(yValues.size());
+    for (int i = 0; i < yValues.size(); ++i)
+        xValues[i] = i + 1;
+
+    // ---- Simple for-loop update ----
+    QVector<double> currentY;
+    QVector<double> currentX;
+
+    for (int i = 0; i < yValues.size(); ++i) {
+        currentX.append(xValues[i]);
+        currentY.append(yValues[i]);
+
+        curve_->setSamples(currentX, currentY);
+        ui_.qwt_plot->replot();
+
+        QThread::msleep(500); // pause for 0.5s so we can see updates
+        qApp->processEvents(); // keep GUI responsive during sleep
+    }
+}
+
 void LittlebotGui::connectHardware()
 {
     try {
@@ -131,6 +166,8 @@ void LittlebotGui::connectHardware()
     QMessageBox msgBox(QMessageBox::Information, "LittleBot", "Connected to device successfully!", QMessageBox::Ok, this);
     msgBox.exec();
 }
+
+
 
 void LittlebotGui::littlebotCommand(const std::string &text)
 {
