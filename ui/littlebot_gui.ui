@@ -62,7 +62,7 @@
     <string>Device</string>
    </property>
   </widget>
-  <widget class="QTabWidget" name="tabWidget">
+  <widget class="QTabWidget" name="tab_widget">
    <property name="geometry">
     <rect>
      <x>10</x>

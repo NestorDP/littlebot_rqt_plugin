@@ -22,8 +22,6 @@
 #include "libserial/ports.hpp"
 #include "libserial/device.hpp"
 
-#include "littlebot_base/littlebot_driver.hpp"
-
 #include "ui_littlebot_gui.h"
 
 #include <qwt_plot.h>
@@ -31,6 +29,8 @@
 #include <qwt_legend.h>
 #include <QVector>
 #include <QThread> // for QThread::msleep
+
+#include "littlebot_rqt_plugin/littlebot_comm.hpp"
 
 namespace littlebot_rqt_plugin
 {
@@ -62,7 +62,7 @@ public:
     /**
      * @brief Update the status display in the GUI
      */
-    void updateStatusDisplay();
+    // void updateStatusDisplay();
 
 
     void updatePlots();
@@ -73,6 +73,8 @@ signals:
      */
     void littlebotStatus();
 
+    void connectHardware(QString portName);
+
 public slots:
     /**
      * @brief Slot to handle Littlebot command input
@@ -80,21 +82,22 @@ public slots:
      */
     void littlebotCommand(const std::string &text);
 
+    /**
+     * @brief Slot to handle errors
+     */
+    void showError(const QString &message);
+
+
 private:
     /**
      * @brief Get the status of the Littlebot
      */
-    void getStatus();
+    // void getStatus();
 
     /**
      * @brief Send a command to the Littlebot
      */
-    void sendCommand();
-
-    /**
-     * @brief Connect to the Littlebot hardware
-     */
-    void connectHardware();
+    // void sendCommand();
 
     /**
      * @brief UI object for the Littlebot GUI
@@ -116,25 +119,11 @@ private:
      */
     int current_number_of_devices_{0};
 
-    /**
-     * @brief Shared pointer to the Littlebot driver
-     */
-    std::shared_ptr<littlebot_base::LittlebotDriver> littlebot_driver_;
+    std::vector<float> command_velocities_{0.0f, 0.0f};
 
-    std::map<std::string, float> command_velocities_{
-        {"left_wheel", 0.0f},
-        {"right_wheel", 0.0f}
-    };
+    std::vector<float> status_positions_{0.0f, 0.0f};
 
-    std::map<std::string, float> status_positions_{
-        {"left_wheel", 0.0f},
-        {"right_wheel", 0.0f}
-    };
-
-    std::map<std::string, float> status_velocities_{
-        {"left_wheel", 0.0f},
-        {"right_wheel", 0.0f}
-    };
+    std::vector<float> status_velocities_{0.0f, 0.0f};
 
     QwtPlotCurve *curve_;
 };

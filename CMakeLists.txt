@@ -25,11 +25,13 @@ pkg_check_modules(LIBSERIAL REQUIRED IMPORTED_TARGET libserial)
 set(${PROJECT_NAME}_SRCS
   src/littlebot_rqt_plugin.cpp
   src/littlebot_gui.cpp
+  src/littlebot_comm.cpp
 )
 
 set(${PROJECT_NAME}_HEADERS
   include/${PROJECT_NAME}/littlebot_rqt_plugin.hpp
   include/${PROJECT_NAME}/littlebot_gui.hpp
+  include/${PROJECT_NAME}/littlebot_comm.hpp
 )
 
 set(${PROJECT_NAME}_QT_UI_SOURCES

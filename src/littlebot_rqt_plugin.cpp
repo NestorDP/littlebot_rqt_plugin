@@ -9,9 +9,10 @@
 namespace littlebot_rqt_plugin
 {
 LittlebotRqtPlugin::LittlebotRqtPlugin()
-: rqt_gui_cpp::Plugin(), widget_(new LittlebotGui())
+: rqt_gui_cpp::Plugin(), gui_(new LittlebotGui()), comm_(new LittlebotComm())
 {
-  widget_->setObjectName("LittlebotGui");
+  gui_->setObjectName("LittlebotGui");
+  comm_->setObjectName("LittlebotComm");
 
   node_ = std::make_shared<rclcpp::Node>("littlebot_rqt_plugin");
 
@@ -19,13 +20,17 @@ LittlebotRqtPlugin::LittlebotRqtPlugin()
   connect(ros_spin_timer, &QTimer::timeout, this, &LittlebotRqtPlugin::handleSpinOnTimer);
   ros_spin_timer->start(500);
 
+  connect(gui_, &LittlebotGui::connectHardware, comm_, &LittlebotComm::connectHardware);
+  connect(comm_, &LittlebotComm::errorOccurred, gui_, &LittlebotGui::showError);
+
+
   createPublisher();
   createSubscriber();
 }
 
 void LittlebotRqtPlugin::initPlugin(qt_gui_cpp::PluginContext& context)
 {
-  context.addWidget(widget_);
+  context.addWidget(gui_);
 }
 
 void LittlebotRqtPlugin::handleSpinOnTimer()
@@ -47,13 +52,13 @@ void LittlebotRqtPlugin::littlebotStatus()
 
 void LittlebotRqtPlugin::createPublisher()
 {
-  connect(widget_, &LittlebotGui::littlebotStatus, this, &LittlebotRqtPlugin::littlebotStatus);
+  connect(gui_, &LittlebotGui::littlebotStatus, this, &LittlebotRqtPlugin::littlebotStatus);
   publisher_ = node_->create_publisher<std_msgs::msg::String>("littlebot_command", 10);
 }
 
 void LittlebotRqtPlugin::createSubscriber()
 {
-  connect(this, &LittlebotRqtPlugin::littlebotCommand, widget_, &LittlebotGui::littlebotCommand);
+  connect(this, &LittlebotRqtPlugin::littlebotCommand, gui_, &LittlebotGui::littlebotCommand);
   auto message_callback = [this](std_msgs::msg::String msg) -> void {
     RCLCPP_INFO(node_->get_logger(), "I heard: '%s'", msg.data.c_str());
     emit littlebotCommand(msg.data);
