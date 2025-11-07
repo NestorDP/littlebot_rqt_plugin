@@ -66,27 +66,34 @@ void LittlebotComm::stopTimer()
 
 void LittlebotComm::updateStatusDataFromHardware()
 {
-    if (littlebot_driver_) {
-        if (littlebot_driver_->receiveData() == 'S') {
-            status_velocities_ = littlebot_driver_->getStatusVelocities();
-            status_positions_ = littlebot_driver_->getStatusPositions();
+    try {
+        if (littlebot_driver_) {
+            littlebot_driver_->sendData('S');
+            if (littlebot_driver_->receiveData() == 'S') {
+                status_velocities_ = littlebot_driver_->getStatusVelocities();
+                status_positions_ = littlebot_driver_->getStatusPositions();
 
-            QVector<float> vel_data{
-                status_velocities_["left_wheel"],
-                status_velocities_["right_wheel"]
-            };
-            QVector<float> pos_data{
-                status_positions_["left_wheel"],
-                status_positions_["right_wheel"]
-            };
+                QVector<float> vel_data{
+                    status_velocities_["left_wheel"],
+                    status_velocities_["right_wheel"]
+                };
+                QVector<float> pos_data{
+                    status_positions_["left_wheel"],
+                    status_positions_["right_wheel"]
+                };
 
-            emit sendVelocitiesStatus(vel_data);
-            emit sendPositionsStatus(pos_data);
+                emit sendVelocitiesStatus(vel_data);
+                emit sendPositionsStatus(pos_data);
+            } else {
+                throw std::runtime_error("Failed to receive status data from hardware.");
+            }
         } else {
-            emit errorOccurred("Failed to receive status data from hardware.");
+            throw std::runtime_error("Littlebot driver not initialized.");
         }
-    } else {
-        emit errorOccurred("Littlebot driver not initialized.");
+    } catch (const std::exception &ex) {
+        emit errorOccurred(QString::fromStdString(std::string("Error during status update: ") + ex.what()));
+        this->stopTimer();
+        return;
     }
 }
 }  // namespace littlebot_rqt_plugin
