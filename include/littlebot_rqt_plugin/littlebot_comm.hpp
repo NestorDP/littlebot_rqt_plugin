@@ -27,9 +27,13 @@ public slots:
      */
     void connectHardware(QString portName);
 
+    void disconnectHardware();
+
 signals:
     // void dataReceived(const QVector<double> &data);
     void errorOccurred(const QString &message);
+
+    void connectionStatus(bool connected);
 
 private:
     /**

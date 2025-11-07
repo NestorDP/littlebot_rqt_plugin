@@ -21,7 +21,9 @@ LittlebotRqtPlugin::LittlebotRqtPlugin()
   ros_spin_timer->start(500);
 
   connect(gui_, &LittlebotGui::connectHardware, comm_, &LittlebotComm::connectHardware);
+  connect(gui_, &LittlebotGui::disconnectHardware, comm_, &LittlebotComm::disconnectHardware);
   connect(comm_, &LittlebotComm::errorOccurred, gui_, &LittlebotGui::showError);
+  connect(comm_, &LittlebotComm::connectionStatus, gui_, &LittlebotGui::updateWidgetsWithConnectionState);
 
 
   createPublisher();

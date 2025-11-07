@@ -23,6 +23,21 @@ void LittlebotComm::connectHardware(QString portName)
         emit errorOccurred(QString::fromStdString(std::string("Connection failed: ") + ex.what()));
         return;
     }
+    emit connectionStatus(true);
+}
+
+void LittlebotComm::disconnectHardware()
+{
+    try {
+        if (littlebot_driver_) {
+            serial_->close();
+            littlebot_driver_.reset();
+        }
+    } catch (const std::exception &ex) {
+        emit errorOccurred(QString::fromStdString(std::string("Disconnection failed: ") + ex.what()));
+        return;
+    }
+    emit connectionStatus(false);
 }
 
 // void LittlebotComm::dataRequest() {

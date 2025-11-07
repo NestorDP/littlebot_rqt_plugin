@@ -40,6 +40,10 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     connect(ui_.push_connect, &QPushButton::clicked, this, 
     [this]() {
         QString currentPortName = ui_.label_device_port->text();
+        if (connected_) {
+            emit disconnectHardware();
+            return;
+        }
         emit connectHardware(currentPortName); 
     });
 
@@ -150,6 +154,20 @@ void LittlebotGui::showError(const QString &message)
 {
     QMessageBox msgBox(QMessageBox::Critical, "LittleBot", message, QMessageBox::Ok, this);
     msgBox.exec();
+}
+
+void LittlebotGui::updateWidgetsWithConnectionState(bool connected)
+{
+    connected_ = connected;
+    if (connected) {
+        ui_.push_connect->setText("Disconnect");
+        ui_.combo_dev_serial_available->setEnabled(false);
+        ui_.label_device_port->setStyleSheet("color: green;");
+    } else {
+        ui_.push_connect->setText("Connect");
+        ui_.combo_dev_serial_available->setEnabled(true);
+        ui_.label_device_port->setStyleSheet("color: black;");
+    }
 }
 
 // void LittlebotGui::littlebotCommand(const std::string &text)

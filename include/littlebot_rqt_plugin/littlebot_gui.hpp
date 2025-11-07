@@ -75,6 +75,8 @@ signals:
 
     void connectHardware(QString portName);
 
+    void disconnectHardware();
+
 public slots:
     /**
      * @brief Slot to handle Littlebot command input
@@ -86,6 +88,8 @@ public slots:
      * @brief Slot to handle errors
      */
     void showError(const QString &message);
+
+    void updateWidgetsWithConnectionState(bool connected);
 
 
 private:
@@ -126,6 +130,8 @@ private:
     std::vector<float> status_velocities_{0.0f, 0.0f};
 
     QwtPlotCurve *curve_;
+
+    bool connected_{false};
 };
 
 }  // namespace littlebot_rqt_plugin
