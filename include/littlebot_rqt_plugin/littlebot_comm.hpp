@@ -15,13 +15,6 @@ class LittlebotComm : public QObject {
 public:
     explicit LittlebotComm(QObject *parent = nullptr);
 
-public slots:   
-    void connectHardware(QString portName);
-
-    void disconnectHardware();
-
-    void receiveVelocitiesCommand(const QVector<float> &data);
-
 signals:
     void sendVelocitiesStatus(const QVector<float> &data);
 
