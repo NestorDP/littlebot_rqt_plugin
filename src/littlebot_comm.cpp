@@ -10,11 +10,6 @@ LittlebotComm::LittlebotComm(QObject *parent)
     serial_ = std::make_shared<littlebot_base::SerialPort>();
 }
 
-
-// void LittlebotComm::dataRequest() {
-//     littlebot_driver_->requestData();
-// }
-
 void LittlebotComm::connectHardware(QString portName)
 {
     try {
@@ -40,20 +35,55 @@ void LittlebotComm::disconnectHardware()
     emit connectionStatus(false);
 }
 
-// void LittlebotComm::dataRequest() {
-//     QByteArray cmd = "GETDATA\n";
-//     serial_->write(cmd);
-// }
+void LittlebotComm::receiveVelocitiesCommand(const QVector<float> &data)
+{
+    if (data.size() < 2) {
+        emit errorOccurred("Insufficient velocity data received.");
+        return;
+    }
 
-// void LittlebotComm::onDataAvailable() {
-//     QByteArray response = serial_->readAll();
+    command_velocities_["left_wheel"] = data[0];
+    command_velocities_["right_wheel"] = data[1];
+}
 
-//     // Example: parse numeric values separated by spaces
-//     QVector<double> data;
-//     QList<QByteArray> parts = response.trimmed().split(' ');
-//     for (const auto &p : parts)
-//         data.append(p.toDouble());
-
-//     emit dataReceived(data);
-// }
 }  // namespace littlebot_rqt_plugin
+
+
+
+
+
+
+
+    // std::map<std::string, float> velocities{
+    //     {"left_wheel", data[0]},
+    //     {"right_wheel", data[1]}
+    // };
+
+    // if (littlebot_driver_) {
+    //     littlebot_driver_->setCommandVelocities(velocities);
+    //     if (!littlebot_driver_->sendData('C')) {
+    //         emit errorOccurred("Failed to send command velocities to hardware.");
+    //         return;
+    //     }
+
+    //     if (littlebot_driver_->receiveData() == 'S') {
+    //         auto status_velocities = littlebot_driver_->getStatusVelocities();
+    //         auto status_positions = littlebot_driver_->getStatusPositions();
+
+    //         QVector<float> vel_data{
+    //             status_velocities["left_wheel"],
+    //             status_velocities["right_wheel"]
+    //         };
+    //         QVector<float> pos_data{
+    //             status_positions["left_wheel"],
+    //             status_positions["right_wheel"]
+    //         };
+
+    //         emit sendVelocitiesStatus(vel_data);
+    //         emit sendPositionsStatus(pos_data);
+    //     } else {
+    //         emit errorOccurred("Failed to receive status data from hardware.");
+    //     }
+    // } else {
+    //     emit errorOccurred("Littlebot driver not initialized.");
+    // }

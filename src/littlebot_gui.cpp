@@ -170,15 +170,30 @@ void LittlebotGui::updateWidgetsWithConnectionState(bool connected)
     }
 }
 
-// void LittlebotGui::littlebotCommand(const std::string &text)
-// {
-//     // ui_.textBrowser->append(QString::fromStdString(text));
-// }
+void LittlebotGui::receiveVelocitiesStatus(const QVector<float> &data)
+{
+    if (data.size() < 2) {
+        this->showError("Insufficient velocity data received.");
+        return;
+    }
+
+    status_velocities_["left_wheel"] = data[0];
+    status_velocities_["right_wheel"] = data[1];
+}
+
+void LittlebotGui::receivePositionsStatus(const QVector<float> &data)
+{
+    if (data.size() < 2) {
+        this->showError("Insufficient position data received.");
+        return;
+    }
+
+    status_positions_["left_wheel"] = data[0];
+    status_positions_["right_wheel"] = data[1];
+}
 
 void LittlebotGui::littlebotCommand(const std::string &text)
 {
-    // The UI doesn't contain a text browser widget. Show the incoming
-    // message in an information dialog so the user can see it.
     QMessageBox::information(this, "Littlebot Message", QString::fromStdString(text));
 }
 

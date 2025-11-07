@@ -77,6 +77,8 @@ signals:
 
     void disconnectHardware();
 
+    void sendVelocitiesCommand(const QVector<float> &data);
+
 public slots:
     /**
      * @brief Slot to handle Littlebot command input
@@ -91,6 +93,9 @@ public slots:
 
     void updateWidgetsWithConnectionState(bool connected);
 
+    void receiveVelocitiesStatus(const QVector<float> &data);
+
+    void receivePositionsStatus(const QVector<float> &data);
 
 private:
     /**
@@ -123,11 +128,11 @@ private:
      */
     int current_number_of_devices_{0};
 
-    std::vector<float> command_velocities_{0.0f, 0.0f};
+    std::map<std::string, float> command_velocities_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
 
-    std::vector<float> status_positions_{0.0f, 0.0f};
+    std::map<std::string, float> status_positions_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
 
-    std::vector<float> status_velocities_{0.0f, 0.0f};
+    std::map<std::string, float> status_velocities_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
 
     QwtPlotCurve *curve_;
 
