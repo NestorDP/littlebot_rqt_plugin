@@ -5,9 +5,13 @@
 namespace littlebot_rqt_plugin
 {
 LittlebotComm::LittlebotComm(QObject *parent)
-    : QObject(parent)
+    : QObject(parent),
+      timer_(new QTimer(this))
 {
     serial_ = std::make_shared<littlebot_base::SerialPort>();
+    
+    connect(timer_, &QTimer::timeout,
+            this,  &LittlebotComm::updateStatusDataFromHardware);
 }
 
 void LittlebotComm::connectHardware(QString portName)
@@ -46,6 +50,45 @@ void LittlebotComm::receiveVelocitiesCommand(const QVector<float> &data)
     command_velocities_["right_wheel"] = data[1];
 }
 
+void LittlebotComm::startTimer()
+{
+    if (!timer_->isActive()) {
+        timer_->start(kTimerInterval_ms);
+    }
+}
+
+void LittlebotComm::stopTimer()
+{
+    if (timer_->isActive()) {
+        timer_->stop();
+    }
+}
+
+void LittlebotComm::updateStatusDataFromHardware()
+{
+    if (littlebot_driver_) {
+        if (littlebot_driver_->receiveData() == 'S') {
+            status_velocities_ = littlebot_driver_->getStatusVelocities();
+            status_positions_ = littlebot_driver_->getStatusPositions();
+
+            QVector<float> vel_data{
+                status_velocities_["left_wheel"],
+                status_velocities_["right_wheel"]
+            };
+            QVector<float> pos_data{
+                status_positions_["left_wheel"],
+                status_positions_["right_wheel"]
+            };
+
+            emit sendVelocitiesStatus(vel_data);
+            emit sendPositionsStatus(pos_data);
+        } else {
+            emit errorOccurred("Failed to receive status data from hardware.");
+        }
+    } else {
+        emit errorOccurred("Littlebot driver not initialized.");
+    }
+}
 }  // namespace littlebot_rqt_plugin
 
 

@@ -28,11 +28,17 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     : QDialog(parent)
 {
     ui_.setupUi(this);
+
+    ui_.push_start_capture->setEnabled(false);
+    ui_.push_stop_capture->setEnabled(false);
+
     this->updateAvailableDevices();
 
     // connect(ui_.push_set_cmd, &QPushButton::clicked, this, &LittlebotGui::sendCommand);
     // connect(ui_.push_get_status, &QPushButton::clicked, this, &LittlebotGui::updateStatusDisplay);
-    // connect(ui_.push_connect, &QPushButton::clicked, this, &LittlebotComm::connectHardware);
+
+    connect(ui_.push_start_capture, &QPushButton::clicked, this, &LittlebotGui::startCapture);
+    connect(ui_.push_stop_capture, &QPushButton::clicked, this, &LittlebotGui::stopCapture);
 
     connect(ui_.combo_dev_serial_available, QOverload<int>::of(&QComboBox::activated),
         [this](int index) {this->updateAvailableDevices();
@@ -163,10 +169,14 @@ void LittlebotGui::updateWidgetsWithConnectionState(bool connected)
         ui_.push_connect->setText("Disconnect");
         ui_.combo_dev_serial_available->setEnabled(false);
         ui_.label_device_port->setStyleSheet("color: green;");
+        ui_.push_start_capture->setEnabled(true);
+        ui_.push_stop_capture->setEnabled(true);
     } else {
         ui_.push_connect->setText("Connect");
         ui_.combo_dev_serial_available->setEnabled(true);
         ui_.label_device_port->setStyleSheet("color: black;");
+        ui_.push_start_capture->setEnabled(false);
+        ui_.push_stop_capture->setEnabled(false);
     }
 }
 
@@ -179,6 +189,7 @@ void LittlebotGui::receiveVelocitiesStatus(const QVector<float> &data)
 
     status_velocities_["left_wheel"] = data[0];
     status_velocities_["right_wheel"] = data[1];
+    this->updatePlots();
 }
 
 void LittlebotGui::receivePositionsStatus(const QVector<float> &data)
@@ -190,6 +201,7 @@ void LittlebotGui::receivePositionsStatus(const QVector<float> &data)
 
     status_positions_["left_wheel"] = data[0];
     status_positions_["right_wheel"] = data[1];
+    this->updatePlots();
 }
 
 void LittlebotGui::littlebotCommand(const std::string &text)

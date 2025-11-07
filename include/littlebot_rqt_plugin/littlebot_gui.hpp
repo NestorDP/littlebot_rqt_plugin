@@ -79,6 +79,10 @@ signals:
 
     void sendVelocitiesCommand(const QVector<float> &data);
 
+    void startCapture();
+
+    void stopCapture();
+
 public slots:
     /**
      * @brief Slot to handle Littlebot command input

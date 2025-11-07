@@ -22,8 +22,14 @@ LittlebotRqtPlugin::LittlebotRqtPlugin()
 
   connect(gui_, &LittlebotGui::connectHardware, comm_, &LittlebotComm::connectHardware);
   connect(gui_, &LittlebotGui::disconnectHardware, comm_, &LittlebotComm::disconnectHardware);
+  connect(gui_, &LittlebotGui::sendVelocitiesCommand, comm_, &LittlebotComm::receiveVelocitiesCommand);
+  connect(gui_, &LittlebotGui::startCapture, comm_, &LittlebotComm::startTimer);
+  connect(gui_, &LittlebotGui::stopCapture, comm_, &LittlebotComm::stopTimer);
+
   connect(comm_, &LittlebotComm::errorOccurred, gui_, &LittlebotGui::showError);
   connect(comm_, &LittlebotComm::connectionStatus, gui_, &LittlebotGui::updateWidgetsWithConnectionState);
+  connect(comm_, &LittlebotComm::sendVelocitiesStatus, gui_, &LittlebotGui::receiveVelocitiesStatus);
+  connect(comm_, &LittlebotComm::sendPositionsStatus, gui_, &LittlebotGui::receivePositionsStatus);
 
 
   createPublisher();

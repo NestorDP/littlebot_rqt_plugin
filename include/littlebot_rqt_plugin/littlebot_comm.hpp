@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QTimer>
 
 #include "littlebot_base/littlebot_driver.hpp"
 
@@ -24,6 +25,22 @@ signals:
 
     void connectionStatus(bool connected);
 
+public slots:   
+    void connectHardware(QString portName);
+
+    void disconnectHardware();
+
+    void receiveVelocitiesCommand(const QVector<float> &data);
+
+    void startTimer();
+
+    void stopTimer();
+
+private slots:
+    void updateStatusDataFromHardware();
+
+    // void updateCommandDataToHardware();
+
 private:
     std::shared_ptr<littlebot_base::LittlebotDriver> littlebot_driver_;
 
@@ -34,5 +51,9 @@ private:
     std::map<std::string, float> status_positions_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
 
     std::map<std::string, float> status_velocities_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
+
+    QTimer *timer_;
+
+    static constexpr int kTimerInterval_ms{500};
 };
 }  // namespace littlebot_rqt_plugin
