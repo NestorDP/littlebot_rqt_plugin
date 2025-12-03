@@ -28,9 +28,7 @@ LittlebotRqtPlugin::LittlebotRqtPlugin()
 
   connect(comm_, &LittlebotComm::errorOccurred, gui_, &LittlebotGui::showError);
   connect(comm_, &LittlebotComm::connectionStatus, gui_, &LittlebotGui::updateWidgetsWithConnectionState);
-  connect(comm_, &LittlebotComm::sendVelocitiesStatus, gui_, &LittlebotGui::receiveVelocitiesStatus);
-  connect(comm_, &LittlebotComm::sendPositionsStatus, gui_, &LittlebotGui::receivePositionsStatus);
-
+  connect(comm_, &LittlebotComm::sendDataStatus, gui_, &LittlebotGui::receiveDataStatus);
 
   createPublisher();
   createSubscriber();
@@ -48,7 +46,19 @@ void LittlebotRqtPlugin::handleSpinOnTimer()
 
 void LittlebotRqtPlugin::shutdownPlugin()
 {
+  // clean up rclcpp node
   node_.reset();
+
+  // delete owned Qt objects to ensure nothing created by this plugin
+  // remains on the heap when the plugin library is unloaded.
+  if (comm_) {
+    delete comm_;
+    comm_ = nullptr;
+  }
+  if (gui_) {
+    delete gui_;
+    gui_ = nullptr;
+  }
 }
 
 void LittlebotRqtPlugin::littlebotStatus()

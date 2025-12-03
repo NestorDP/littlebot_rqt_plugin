@@ -64,7 +64,14 @@ public:
      */
     // void updateStatusDisplay();
 
+    /**
+     * @brief Update the curves to plot with new data
+     */
+    void updateCurvesToPlot(std::shared_ptr<std::vector<double>> data);
 
+    /**
+     * @brief Update the plots with the latest curves
+     */
     void updatePlots();
 
 signals:
@@ -84,22 +91,14 @@ signals:
     void stopCapture();
 
 public slots:
-    /**
-     * @brief Slot to handle Littlebot command input
-     * @param text Command text
-     */
+
     void littlebotCommand(const std::string &text);
 
-    /**
-     * @brief Slot to handle errors
-     */
     void showError(const QString &message);
 
     void updateWidgetsWithConnectionState(bool connected);
 
-    void receiveVelocitiesStatus(const QVector<float> &data);
-
-    void receivePositionsStatus(const QVector<float> &data);
+    void receiveDataStatus(const QVector<float> &data);
 
 private:
     /**
@@ -110,7 +109,7 @@ private:
     /**
      * @brief Send a command to the Littlebot
      */
-    // void sendCommand();
+    // void setCommand();
 
     /**
      * @brief UI object for the Littlebot GUI
@@ -132,15 +131,29 @@ private:
      */
     int current_number_of_devices_{0};
 
-    std::map<std::string, float> command_velocities_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
+    float command_velocity_setpoint_left_{0.0f};
 
-    std::map<std::string, float> status_positions_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
+    float command_velocity_setpoint_right_{0.0f};
 
-    std::map<std::string, float> status_velocities_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
+    std::vector<double> command_velocity_left_{0.0f};
+    
+    std::vector<double> command_velocity_right_{0.0f};
 
-    QwtPlotCurve *curve_;
+    std::vector<double> status_velocity_left_{0.0f};
+
+    std::vector<double> status_velocity_right_{0.0f};
+
+    std::vector<double> status_position_left_{0.0f};
+
+    std::vector<double> status_position_right_{0.0f};
+
+    std::vector<double> plot_index_;
 
     bool connected_{false};
+
+    QwtPlotCurve *curve{nullptr};
+
+    static constexpr int kMaxPoints{100};
 };
 
 }  // namespace littlebot_rqt_plugin

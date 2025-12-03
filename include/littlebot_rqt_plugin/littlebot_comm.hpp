@@ -17,9 +17,7 @@ public:
     explicit LittlebotComm(QObject *parent = nullptr);
 
 signals:
-    void sendVelocitiesStatus(const QVector<float> &data);
-
-    void sendPositionsStatus(const QVector<float> &data);
+    void sendDataStatus(const QVector<float> &data);
 
     void errorOccurred(const QString &message);
 

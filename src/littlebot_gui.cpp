@@ -53,11 +53,10 @@ LittlebotGui::LittlebotGui(QWidget *parent)
         emit connectHardware(currentPortName); 
     });
 
-
     this->updatePlots();
 }
 
-// void LittlebotGui::sendCommand()
+// void LittlebotGui::setCommand()
 // {
 //     emit littlebotStatus();
 // }
@@ -65,7 +64,7 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 // void LittlebotGui::getStatus()
 // {
 
-//     // emit littlebotStatus();
+//     emit littlebotStatus();
 // }
 
 void LittlebotGui::updateAvailableDevices()
@@ -104,55 +103,45 @@ void LittlebotGui::updateAvailableDevices()
     }
 }
 
-// void LittlebotGui::updateStatusDisplay()
-// {
-//     this->getStatus();
-//     try {
-//         ui_.lcd_left_pos_status->display(
-//             QString::number(status_positions_["left_wheel"], 'f', 2));
-//         ui_.lcd_right_pos_status->display(
-//             QString::number(status_positions_["right_wheel"], 'f', 2));
-//         ui_.lcd_left_vel_status->display(
-//             QString::number(status_velocities_["left_wheel"], 'f', 2));
-//         ui_.lcd_right_vel_status->display(
-//             QString::number(status_velocities_["right_wheel"], 'f', 2));
-//     } catch (const std::exception &ex) {
-//         QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Failed to update status display: ") + ex.what(), QMessageBox::Ok, this);
-//         msgBox.exec();
-//     }
-// }
-
 void LittlebotGui::updatePlots()
 {
-    ui_.qwt_plot->setTitle("Simple QwtPlot Update Example");
-    ui_.qwt_plot->setAxisTitle(QwtPlot::xBottom, "Index");
-    ui_.qwt_plot->setAxisTitle(QwtPlot::yLeft, "Value");
+    ui_.qwt_plot->setTitle("Left Wheel Velocity");
+    // ui_.qwt_plot->setAxisTitle(QwtPlot::xBottom, "Index");
+    // ui_.qwt_plot->setAxisTitle(QwtPlot::yLeft, "Value");
 
-    curve_ = new QwtPlotCurve();
-    curve_->attach(ui_.qwt_plot);
-    curve_->setPen(Qt::blue, 2);
-    curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-
-    // ---- Simple test data ----
-    QVector<double> yValues = {1, 2, 3, 4, 5};
-    QVector<double> xValues(yValues.size());
-    for (int i = 0; i < yValues.size(); ++i)
-        xValues[i] = i + 1;
-
-    // ---- Simple for-loop update ----
-    QVector<double> currentY;
-    QVector<double> currentX;
-
-    for (int i = 0; i < yValues.size(); ++i) {
-        currentX.append(xValues[i]);
-        currentY.append(yValues[i]);
-
-        curve_->setSamples(currentX, currentY);
-        ui_.qwt_plot->replot();
-
-        QThread::msleep(500); // pause for 0.5s so we can see updates
-        qApp->processEvents(); // keep GUI responsive during sleep
+    // Ensure the curve is created and attached before using it
+    if (curve == nullptr) {
+        curve = new QwtPlotCurve();
+        curve->attach(ui_.qwt_plot);
     }
+
+    auto status_velocity_left_ptr = std::make_shared<std::vector<double>>(status_velocity_left_);
+
+    this->updateCurvesToPlot(status_velocity_left_ptr);
+
+}
+
+void LittlebotGui::updateCurvesToPlot(std::shared_ptr<std::vector<double>> data)
+{
+    if (!curve) {
+        return;
+    }
+
+    curve->setPen(Qt::blue, 2);
+    curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+
+    // Guard against size mismatch
+    if (plot_index_.size() != data->size()) {
+        // If plot index is empty, generate a simple index
+        if (plot_index_.empty()) {
+            plot_index_.resize(data->size());
+            for (size_t i = 0; i < data->size(); ++i) plot_index_[i] = static_cast<double>(i);
+        }
+    }
+
+    curve->setSamples(plot_index_.data(), data->data(), std::min(plot_index_.size(), data->size()));
+
+    ui_.qwt_plot->replot();
 }
 
 
@@ -179,28 +168,34 @@ void LittlebotGui::updateWidgetsWithConnectionState(bool connected)
         ui_.push_stop_capture->setEnabled(false);
     }
 }
-
-void LittlebotGui::receiveVelocitiesStatus(const QVector<float> &data)
+void LittlebotGui::receiveDataStatus(const QVector<float> &data)
 {
-    if (data.size() < 2) {
-        this->showError("Insufficient velocity data received.");
+    if (data.size() < 4) {
+        this->showError("Insufficient status data received.");
         return;
     }
 
-    status_velocities_["left_wheel"] = data[0];
-    status_velocities_["right_wheel"] = data[1];
-    this->updatePlots();
-}
+    auto velocity_left = data[0];
+    auto velocity_right = data[1];
+    auto position_left = data[2];
+    auto position_right = data[3];
 
-void LittlebotGui::receivePositionsStatus(const QVector<float> &data)
-{
-    if (data.size() < 2) {
-        this->showError("Insufficient position data received.");
-        return;
+    auto current_index = plot_index_.empty() ? 0 : plot_index_.back() + 1;
+    plot_index_.push_back(current_index);
+
+    status_velocity_left_.push_back(velocity_left);
+    status_velocity_right_.push_back(velocity_right);
+    status_position_left_.push_back(position_left);
+    status_position_right_.push_back(position_right);
+
+    if (plot_index_.size() > kMaxPoints) {
+        plot_index_.erase(plot_index_.begin());
+        status_velocity_left_.erase(status_velocity_left_.begin());
+        status_velocity_right_.erase(status_velocity_right_.begin());
+        status_position_left_.erase(status_position_left_.begin());
+        status_position_right_.erase(status_position_right_.begin());
     }
 
-    status_positions_["left_wheel"] = data[0];
-    status_positions_["right_wheel"] = data[1];
     this->updatePlots();
 }
 
@@ -208,5 +203,23 @@ void LittlebotGui::littlebotCommand(const std::string &text)
 {
     QMessageBox::information(this, "Littlebot Message", QString::fromStdString(text));
 }
+
+// void LittlebotGui::updateStatusDisplay()
+// {
+//     this->getStatus();
+//     try {
+//         ui_.lcd_left_pos_status->display(
+//             QString::number(status_positions_["left_wheel"], 'f', 2));
+//         ui_.lcd_right_pos_status->display(
+//             QString::number(status_positions_["right_wheel"], 'f', 2));
+//         ui_.lcd_left_vel_status->display(
+//             QString::number(status_velocities_["left_wheel"], 'f', 2));
+//         ui_.lcd_right_vel_status->display(
+//             QString::number(status_velocities_["right_wheel"], 'f', 2));
+//     } catch (const std::exception &ex) {
+//         QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Failed to update status display: ") + ex.what(), QMessageBox::Ok, this);
+//         msgBox.exec();
+//     }
+// }
 
 }  // namespace littlebot_rqt_plugin

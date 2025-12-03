@@ -73,17 +73,14 @@ void LittlebotComm::updateStatusDataFromHardware()
                 status_velocities_ = littlebot_driver_->getStatusVelocities();
                 status_positions_ = littlebot_driver_->getStatusPositions();
 
-                QVector<float> vel_data{
+                QVector<float> data_status{
                     status_velocities_["left_wheel"],
-                    status_velocities_["right_wheel"]
-                };
-                QVector<float> pos_data{
+                    status_velocities_["right_wheel"],
                     status_positions_["left_wheel"],
                     status_positions_["right_wheel"]
                 };
 
-                emit sendVelocitiesStatus(vel_data);
-                emit sendPositionsStatus(pos_data);
+                emit sendDataStatus(data_status);
             } else {
                 throw std::runtime_error("Failed to receive status data from hardware.");
             }
