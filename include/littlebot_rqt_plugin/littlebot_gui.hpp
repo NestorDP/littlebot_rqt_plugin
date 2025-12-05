@@ -24,6 +24,11 @@
 
 #include "ui_littlebot_gui.h"
 
+#include <QFileDialog>
+#include <QFile>
+#include <QTextStream>
+#include <QMessageBox>
+
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_legend.h>
@@ -101,6 +106,8 @@ public slots:
     void receiveDataStatus(const QVector<float> &data);
 
     void updateSetpoint();
+
+    void savePlotDataToFile();
 
 private:
     /**

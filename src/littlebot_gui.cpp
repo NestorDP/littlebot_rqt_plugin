@@ -40,9 +40,14 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     connect(ui_.line_edit_setpoint, &QLineEdit::editingFinished, this, &LittlebotGui::updateSetpoint);
     connect(ui_.push_start_capture, &QPushButton::clicked, this, &LittlebotGui::startCapture);
     connect(ui_.push_stop_capture, &QPushButton::clicked, this, &LittlebotGui::stopCapture);
+    
     connect(ui_.combo_dev_serial_available, QOverload<int>::of(&QComboBox::activated),
         [this](int index) {this->updateAvailableDevices();
     });
+
+    connect(ui_.push_save, &QPushButton::clicked, this,
+        [this](bool){ this->savePlotDataToFile(); });
+
     connect(ui_.push_connect, &QPushButton::clicked, this, 
     [this]() {
         QString currentPortName = ui_.label_device_port->text();
@@ -227,6 +232,33 @@ void LittlebotGui::updateSetpoint()
         this->showError("Invalid setpoint value.");
         ui_.line_edit_setpoint->setText(QString::number(setpoint_, 'f', 2));
     }
+}
+
+void LittlebotGui::savePlotDataToFile()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, "Save Plot Data", "", "CSV Files (*.csv);;All Files (*)");
+    if (fileName.isEmpty()) {
+        return; // User cancelled the dialog
+    }
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        this->showError("Could not open file for writing.");
+        return;
+    }
+
+    QTextStream out(&file);
+    out << "Index,Velocity_Left,Velocity_Right,Position_Left,Position_Right\n";
+    size_t dataSize = plot_index_.size();
+    for (size_t i = 0; i < dataSize; ++i) {
+        out << plot_index_[i] << ","
+            << status_velocity_left_[i] << ","
+            << status_velocity_right_[i] << ","
+            << status_position_left_[i] << ","
+            << status_position_right_[i] << "\n";
+    }
+
+    file.close();
 }
 
 // void LittlebotGui::updateStatusDisplay()
