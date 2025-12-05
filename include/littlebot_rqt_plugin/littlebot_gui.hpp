@@ -100,6 +100,8 @@ public slots:
 
     void receiveDataStatus(const QVector<float> &data);
 
+    void updateSetpoint();
+
 private:
     /**
      * @brief Get the status of the Littlebot
@@ -151,9 +153,13 @@ private:
 
     bool connected_{false};
 
-    QwtPlotCurve *curve{nullptr};
+    QwtPlotCurve *wheel_velocity_curve_{nullptr};
+
+    QwtPlotCurve *setpoint_curve_{nullptr};
 
     static constexpr int kMaxPoints{100};
+
+    float setpoint_{0.0f};
 };
 
 }  // namespace littlebot_rqt_plugin
