@@ -120,13 +120,13 @@ void LittlebotGui::updatePlots()
         setpoint_curve_->attach(ui_.qwt_plot);
     }
 
-    auto status_velocity_left_ptr = std::make_shared<std::vector<double>>(status_velocity_left_);
+    status_velocity_left_ptr_ = std::make_shared<std::vector<double>>(status_velocity_left_);
 
-    this->updateCurvesToPlot(status_velocity_left_ptr);
+    this->updateCurvesToPlot();
 
 }
 
-void LittlebotGui::updateCurvesToPlot(std::shared_ptr<std::vector<double>> data)
+void LittlebotGui::updateCurvesToPlot()
 {
     if (!wheel_velocity_curve_) {
         return;
@@ -139,16 +139,16 @@ void LittlebotGui::updateCurvesToPlot(std::shared_ptr<std::vector<double>> data)
     setpoint_curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
 
     // Guard against size mismatch
-    if (plot_index_.size() != data->size()) {
+    if (plot_index_.size() != status_velocity_left_ptr_->size()) {
         // If plot index is empty, generate a simple index
         if (plot_index_.empty()) {
-            plot_index_.resize(data->size());
-            for (size_t i = 0; i < data->size(); ++i) plot_index_[i] = static_cast<double>(i);
+            plot_index_.resize(status_velocity_left_ptr_->size());
+            for (size_t i = 0; i < status_velocity_left_ptr_->size(); ++i) plot_index_[i] = static_cast<double>(i);
         }
     }
 
-    wheel_velocity_curve_->setSamples(plot_index_.data(), data->data(), std::min(plot_index_.size(), data->size()));
-    setpoint_curve_->setSamples(plot_index_.data(), std::vector<double>(data->size(), setpoint_).data(), data->size());
+    wheel_velocity_curve_->setSamples(plot_index_.data(), status_velocity_left_ptr_->data(), std::min(plot_index_.size(), status_velocity_left_ptr_->size()));
+    setpoint_curve_->setSamples(plot_index_.data(), std::vector<double>(status_velocity_left_ptr_->size(), setpoint_).data(), status_velocity_left_ptr_->size());
 
     ui_.qwt_plot->replot();
 }

@@ -67,7 +67,7 @@ public:
     /**
      * @brief Update the curves to plot with new data
      */
-    void updateCurvesToPlot(std::shared_ptr<std::vector<double>> data);
+    void updateCurvesToPlot();
 
     /**
      * @brief Update the plots with the latest curves
@@ -160,6 +160,8 @@ private:
     static constexpr int kMaxPoints{100};
 
     float setpoint_{0.0f};
+
+    std::shared_ptr<std::vector<double>> status_velocity_left_ptr_{nullptr};
 };
 
 }  // namespace littlebot_rqt_plugin
