@@ -49,14 +49,17 @@ void LittlebotRqtPlugin::shutdownPlugin()
   // clean up rclcpp node
   node_.reset();
 
-  // delete owned Qt objects to ensure nothing created by this plugin
-  // remains on the heap when the plugin library is unloaded.
   if (comm_) {
-    delete comm_;
+    comm_->disconnect();
+    comm_->setParent(nullptr);
+    comm_->deleteLater();
     comm_ = nullptr;
   }
   if (gui_) {
-    delete gui_;
+    gui_->disconnect();
+    gui_->close();
+    gui_->setParent(nullptr);
+    gui_->deleteLater();
     gui_ = nullptr;
   }
 }
