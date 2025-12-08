@@ -34,7 +34,6 @@ public slots:
 
     void stopTimer();
 
-private slots:
     void updateStatusDataFromHardware();
 
     // void updateCommandDataToHardware();

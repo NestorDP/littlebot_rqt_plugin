@@ -60,20 +60,28 @@ public:
     ~LittlebotGui() override = default;
 
     /**
-     * @brief Update the list of available serial devices
+     * @brief Print the protobuf protocol message to the GUI
      */
-    void updateAvailableDevices();
+    void printProtocolMessage();
 
     /**
      * @brief Update the status display in the GUI
      */
-    // void updateStatusDisplay();
+    void updateStatusDisplay(const QVector<float> &data);
+
+    /**
+     * @brief Update the list of available serial devices
+     */
+    void updateAvailableDevices();
 
     /**
      * @brief Update the curves to plot with new data
      */
     void updateVelocitiesCurves();
 
+    /**
+     * @brief Update the setpoint curve to plot with new data
+     */
     void updateSetpointCurves();
 
     // void updatePositionsCurves();
@@ -98,6 +106,8 @@ signals:
     void startCapture();
 
     void stopCapture();
+
+    void requestDataStatus();
 
 public slots:
 

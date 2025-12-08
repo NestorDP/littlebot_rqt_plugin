@@ -25,6 +25,7 @@ LittlebotRqtPlugin::LittlebotRqtPlugin()
   connect(gui_, &LittlebotGui::sendVelocitiesCommand, comm_, &LittlebotComm::receiveVelocitiesCommand);
   connect(gui_, &LittlebotGui::startCapture, comm_, &LittlebotComm::startTimer);
   connect(gui_, &LittlebotGui::stopCapture, comm_, &LittlebotComm::stopTimer);
+  connect(gui_, &LittlebotGui::requestDataStatus, comm_, &LittlebotComm::updateStatusDataFromHardware);
 
   connect(comm_, &LittlebotComm::errorOccurred, gui_, &LittlebotGui::showError);
   connect(comm_, &LittlebotComm::connectionStatus, gui_, &LittlebotGui::updateWidgetsWithConnectionState);

@@ -37,8 +37,9 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     this->updateAvailableDevices();
 
     // connect(ui_.push_set_cmd, &QPushButton::clicked, this, &LittlebotGui::sendCommand);
-    // connect(ui_.push_get_status, &QPushButton::clicked, this, &LittlebotGui::updateStatusDisplay);
 
+    connect(ui_.push_get_status, &QPushButton::clicked, this, 
+		[this]() { emit requestDataStatus(); });
     connect(ui_.line_edit_setpoint, &QLineEdit::editingFinished, this, &LittlebotGui::updateSetpoint);
     connect(ui_.push_start_capture, &QPushButton::clicked, this, &LittlebotGui::startCapture);
     connect(ui_.push_stop_capture, &QPushButton::clicked, this, &LittlebotGui::stopCapture);
@@ -62,17 +63,6 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 
     this->updatePlots();
 }
-
-// void LittlebotGui::setCommand()
-// {
-//     emit littlebotStatus();
-// }
-
-// void LittlebotGui::getStatus()
-// {
-
-//     emit littlebotStatus();
-// }
 
 void LittlebotGui::updateAvailableDevices()
 {
@@ -187,28 +177,35 @@ void LittlebotGui::receiveDataStatus(const QVector<float> &data)
 		return;
 	}
 
-	auto velocity_left = data[0];
-	auto velocity_right = data[1];
-	auto position_left = data[2];
-	auto position_right = data[3];
+	if(ui_.tab_widget->currentIndex() == 0) {
+		auto velocity_left = data[0];
+		auto velocity_right = data[1];
+		auto position_left = data[2];
+		auto position_right = data[3];
 
-	auto current_index = plot_index_.empty() ? 0 : plot_index_.back() + 1;
-	plot_index_.push_back(current_index);
+		auto current_index = plot_index_.empty() ? 0 : plot_index_.back() + 1;
+		plot_index_.push_back(current_index);
 
-	status_velocity_left_.push_back(velocity_left);
-	status_velocity_right_.push_back(velocity_right);
-	status_position_left_.push_back(position_left);
-	status_position_right_.push_back(position_right);
+		status_velocity_left_.push_back(velocity_left);
+		status_velocity_right_.push_back(velocity_right);
+		status_position_left_.push_back(position_left);
+		status_position_right_.push_back(position_right);
 
-	if (plot_index_.size() > kMaxPoints) {
-		plot_index_.erase(plot_index_.begin());
-		status_velocity_left_.erase(status_velocity_left_.begin());
-		status_velocity_right_.erase(status_velocity_right_.begin());
-		status_position_left_.erase(status_position_left_.begin());
-		status_position_right_.erase(status_position_right_.begin());
+		if (plot_index_.size() > kMaxPoints) {
+			plot_index_.erase(plot_index_.begin());
+			status_velocity_left_.erase(status_velocity_left_.begin());
+			status_velocity_right_.erase(status_velocity_right_.begin());
+			status_position_left_.erase(status_position_left_.begin());
+			status_position_right_.erase(status_position_right_.begin());
+		}
+
+		this->updatePlots();
 	}
-
-	this->updatePlots();
+	else {
+		this->updateStatusDisplay(data);
+		// this->printProtocolMessage();
+	}
+	
 }
 
 void LittlebotGui::littlebotCommand(const std::string &text)
@@ -259,22 +256,17 @@ void LittlebotGui::savePlotDataToFile()
 	file.close();
 }
 
-// void LittlebotGui::updateStatusDisplay()
-// {
-//     this->getStatus();
-//     try {
-//         ui_.lcd_left_pos_status->display(
-//             QString::number(status_positions_["left_wheel"], 'f', 2));
-//         ui_.lcd_right_pos_status->display(
-//             QString::number(status_positions_["right_wheel"], 'f', 2));
-//         ui_.lcd_left_vel_status->display(
-//             QString::number(status_velocities_["left_wheel"], 'f', 2));
-//         ui_.lcd_right_vel_status->display(
-//             QString::number(status_velocities_["right_wheel"], 'f', 2));
-//     } catch (const std::exception &ex) {
-//         QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Failed to update status display: ") + ex.what(), QMessageBox::Ok, this);
-//         msgBox.exec();
-//     }
-// }
+void LittlebotGui::updateStatusDisplay(const QVector<float> &data)
+{
+    try {
+		ui_.lcd_left_vel_status->display(QString::number(data[0], 'f', 2));
+        ui_.lcd_right_vel_status->display(QString::number(data[1], 'f', 2));
+        ui_.lcd_left_pos_status->display(QString::number(data[2], 'f', 2));
+        ui_.lcd_right_pos_status->display(QString::number(data[3], 'f', 2));
+    } catch (const std::exception &ex) {
+        QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Failed to update status display: ") + ex.what(), QMessageBox::Ok, this);
+        msgBox.exec();
+    }
+}
 
 }  // namespace littlebot_rqt_plugin
