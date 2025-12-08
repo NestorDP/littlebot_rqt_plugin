@@ -39,7 +39,7 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     // connect(ui_.push_set_cmd, &QPushButton::clicked, this, &LittlebotGui::sendCommand);
 
     connect(ui_.push_get_status, &QPushButton::clicked, this, 
-		[this]() { emit requestDataStatus(); });
+		[this]() { emit requestDataStatus(true); });
     connect(ui_.line_edit_setpoint, &QLineEdit::editingFinished, this, &LittlebotGui::updateSetpoint);
     connect(ui_.push_start_capture, &QPushButton::clicked, this, &LittlebotGui::startCapture);
     connect(ui_.push_stop_capture, &QPushButton::clicked, this, &LittlebotGui::stopCapture);
@@ -133,7 +133,6 @@ void LittlebotGui::updateVelocitiesCurves()
 			for (size_t i = 0; i < status_velocity_left_ptr_->size(); ++i) plot_index_[i] = static_cast<double>(i);
 		}
 	}
-
 	wheel_velocity_curve_->setSamples(plot_index_.data(), status_velocity_left_ptr_->data(), std::min(plot_index_.size(), status_velocity_left_ptr_->size()));
 }
 
@@ -141,10 +140,8 @@ void LittlebotGui::updateSetpointCurves()
 {
 	setpoint_curve_->setPen(Qt::red, 2);
 	setpoint_curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-
 	setpoint_curve_->setSamples(plot_index_.data(), std::vector<double>(status_velocity_left_ptr_->size(), setpoint_).data(), status_velocity_left_ptr_->size());
 }
-
 
 void LittlebotGui::showError(const QString &message)
 {
@@ -205,7 +202,6 @@ void LittlebotGui::receiveDataStatus(const QVector<float> &data)
 		this->updateStatusDisplay(data);
 		// this->printProtocolMessage();
 	}
-	
 }
 
 void LittlebotGui::littlebotCommand(const std::string &text)

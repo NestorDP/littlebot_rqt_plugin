@@ -21,6 +21,8 @@ signals:
 
     void errorOccurred(const QString &message);
 
+    void sendProtocolMessage(const QString &message);
+
     void connectionStatus(bool connected);
 
 public slots:   
@@ -34,7 +36,7 @@ public slots:
 
     void stopTimer();
 
-    void updateStatusDataFromHardware();
+    void updateStatusDataFromHardware(const bool debug);
 
     // void updateCommandDataToHardware();
 

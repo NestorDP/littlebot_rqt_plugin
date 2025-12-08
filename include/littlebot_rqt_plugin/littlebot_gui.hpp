@@ -107,7 +107,7 @@ signals:
 
     void stopCapture();
 
-    void requestDataStatus();
+    void requestDataStatus(const bool debug);
 
 public slots:
 
@@ -123,6 +123,7 @@ public slots:
 
     void savePlotDataToFile();
 
+    void receiveProtocolMessage(const QString &message);
 private:
     /**
      * @brief Get the status of the Littlebot

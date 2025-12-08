@@ -10,8 +10,8 @@ LittlebotComm::LittlebotComm(QObject *parent)
 {
     serial_ = std::make_shared<littlebot_base::SerialPort>();
     
-    connect(timer_, &QTimer::timeout,
-            this,  &LittlebotComm::updateStatusDataFromHardware);
+    connect(timer_, &QTimer::timeout, this,  
+        [this]() { this->updateStatusDataFromHardware(false); });
 }
 
 void LittlebotComm::connectHardware(QString portName)
@@ -64,7 +64,7 @@ void LittlebotComm::stopTimer()
     }
 }
 
-void LittlebotComm::updateStatusDataFromHardware()
+void LittlebotComm::updateStatusDataFromHardware(const bool debug)
 {
     try {
         if (littlebot_driver_) {
@@ -80,6 +80,10 @@ void LittlebotComm::updateStatusDataFromHardware()
                     status_positions_["right_wheel"]
                 };
 
+                if (debug) {
+                    QString message{"Message Test!"};
+                    emit sendProtocolMessage(message);
+                }
                 emit sendDataStatus(data_status);
             } else {
                 throw std::runtime_error("Failed to receive status data from hardware.");
