@@ -27,6 +27,8 @@ namespace littlebot_rqt_plugin
 LittlebotGui::LittlebotGui(QWidget *parent)
     : QDialog(parent)
 {
+    status_velocity_left_ptr_ = std::make_shared<std::vector<double>>(status_velocity_left_);
+
     ui_.setupUi(this);
 
     ui_.push_start_capture->setEnabled(false);
@@ -74,191 +76,187 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 
 void LittlebotGui::updateAvailableDevices()
 {
-    try{
-        auto number_of_devices = available_devices_.scanPorts();
-        auto selected_device_id = ui_.combo_dev_serial_available->currentIndex();
-        if(selected_device_id < 0) {
-            selected_device_id = 0;
-        }
+	try{
+		auto number_of_devices = available_devices_.scanPorts();
+		auto selected_device_id = ui_.combo_dev_serial_available->currentIndex();
+		if(selected_device_id < 0) {
+				selected_device_id = 0;
+		}
 
-        auto port_path_opt = available_devices_.findPortPath(static_cast<uint16_t>(selected_device_id));
-        if (port_path_opt.has_value()) {
-            ui_.label_device_port->setText(QString::fromStdString(*port_path_opt));
-        } else {
-            ui_.label_device_port->setText("Unknown");
-        }
+		auto port_path_opt = available_devices_.findPortPath(static_cast<uint16_t>(selected_device_id));
+		if (port_path_opt.has_value()) {
+				ui_.label_device_port->setText(QString::fromStdString(*port_path_opt));
+		} else {
+				ui_.label_device_port->setText("Unknown");
+		}
 
-        if(number_of_devices == current_number_of_devices_) {
-            return;
-        }
-        current_number_of_devices_ = number_of_devices;
-        ui_.combo_dev_serial_available->clear();
-        std::vector<libserial::Device> devices;
-        available_devices_.getDevices(devices);
-        for (const auto& device : devices) {
-            ui_.combo_dev_serial_available->addItem(QString::fromStdString(device.getName()));
-        }
-    } catch (const std::exception &ex) {
-        current_number_of_devices_ = -1;
-        ui_.combo_dev_serial_available->clear();
-        ui_.combo_dev_serial_available->addItem("Unknown");
-        ui_.label_device_port->setText("Unknown");
-        QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Failed to update devices: ") + ex.what(), QMessageBox::Ok, this);
-        msgBox.exec();
-    }
+		if(number_of_devices == current_number_of_devices_) {
+				return;
+		}
+		current_number_of_devices_ = number_of_devices;
+		ui_.combo_dev_serial_available->clear();
+		std::vector<libserial::Device> devices;
+		available_devices_.getDevices(devices);
+		for (const auto& device : devices) {
+				ui_.combo_dev_serial_available->addItem(QString::fromStdString(device.getName()));
+		}
+	} catch (const std::exception &ex) {
+		current_number_of_devices_ = -1;
+		ui_.combo_dev_serial_available->clear();
+		ui_.combo_dev_serial_available->addItem("Unknown");
+		ui_.label_device_port->setText("Unknown");
+		QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Failed to update devices: ") + ex.what(), QMessageBox::Ok, this);
+		msgBox.exec();
+	}
 }
 
 void LittlebotGui::updatePlots()
 {
-    ui_.qwt_plot->setTitle("Left Wheel Velocity");
-    // ui_.qwt_plot->setAxisTitle(QwtPlot::xBottom, "Index");
-    // ui_.qwt_plot->setAxisTitle(QwtPlot::yLeft, "Value");
+	ui_.qwt_plot->setTitle("Left Wheel Velocity");
+	// ui_.qwt_plot->setAxisTitle(QwtPlot::xBottom, "Index");
+	// ui_.qwt_plot->setAxisTitle(QwtPlot::yLeft, "Value");
 
-    // Ensure the curve is created and attached before using it
-    if (wheel_velocity_curve_ == nullptr) {
-        wheel_velocity_curve_ = new QwtPlotCurve();
-        wheel_velocity_curve_->attach(ui_.qwt_plot);
-    }
+	if (wheel_velocity_curve_ == nullptr) {
+		wheel_velocity_curve_ = new QwtPlotCurve();
+		wheel_velocity_curve_->attach(ui_.qwt_plot);
+	}
 
-    if (setpoint_curve_ == nullptr) {
-        setpoint_curve_ = new QwtPlotCurve();
-        setpoint_curve_->attach(ui_.qwt_plot);
-    }
+	if (setpoint_curve_ == nullptr) {
+		setpoint_curve_ = new QwtPlotCurve();
+		setpoint_curve_->attach(ui_.qwt_plot);
+	}
 
-    status_velocity_left_ptr_ = std::make_shared<std::vector<double>>(status_velocity_left_);
+	this->updateVelocitiesCurves();
+	this->updateSetpointCurves();
 
-    this->updateCurvesToPlot();
-
+	ui_.qwt_plot->replot();
 }
 
-void LittlebotGui::updateCurvesToPlot()
+void LittlebotGui::updateVelocitiesCurves()
 {
-    if (!wheel_velocity_curve_) {
-        return;
-    }
+	wheel_velocity_curve_->setPen(Qt::blue, 2);
+	wheel_velocity_curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
 
-    wheel_velocity_curve_->setPen(Qt::blue, 2);
-    wheel_velocity_curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+	if (plot_index_.size() != status_velocity_left_ptr_->size()) {
+		if (plot_index_.empty()) {
+			plot_index_.resize(status_velocity_left_ptr_->size());
+			for (size_t i = 0; i < status_velocity_left_ptr_->size(); ++i) plot_index_[i] = static_cast<double>(i);
+		}
+	}
 
-    setpoint_curve_->setPen(Qt::red, 2);
-    setpoint_curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+	wheel_velocity_curve_->setSamples(plot_index_.data(), status_velocity_left_ptr_->data(), std::min(plot_index_.size(), status_velocity_left_ptr_->size()));
+}
 
-    // Guard against size mismatch
-    if (plot_index_.size() != status_velocity_left_ptr_->size()) {
-        // If plot index is empty, generate a simple index
-        if (plot_index_.empty()) {
-            plot_index_.resize(status_velocity_left_ptr_->size());
-            for (size_t i = 0; i < status_velocity_left_ptr_->size(); ++i) plot_index_[i] = static_cast<double>(i);
-        }
-    }
+void LittlebotGui::updateSetpointCurves()
+{
+	setpoint_curve_->setPen(Qt::red, 2);
+	setpoint_curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
 
-    wheel_velocity_curve_->setSamples(plot_index_.data(), status_velocity_left_ptr_->data(), std::min(plot_index_.size(), status_velocity_left_ptr_->size()));
-    setpoint_curve_->setSamples(plot_index_.data(), std::vector<double>(status_velocity_left_ptr_->size(), setpoint_).data(), status_velocity_left_ptr_->size());
-
-    ui_.qwt_plot->replot();
+	setpoint_curve_->setSamples(plot_index_.data(), std::vector<double>(status_velocity_left_ptr_->size(), setpoint_).data(), status_velocity_left_ptr_->size());
 }
 
 
 void LittlebotGui::showError(const QString &message)
 {
-    QMessageBox msgBox(QMessageBox::Critical, "LittleBot", message, QMessageBox::Ok, this);
-    msgBox.exec();
+	QMessageBox msgBox(QMessageBox::Critical, "LittleBot", message, QMessageBox::Ok, this);
+	msgBox.exec();
 }
 
 void LittlebotGui::updateWidgetsWithConnectionState(bool connected)
 {
-    connected_ = connected;
-    if (connected) {
-        ui_.push_connect->setText("Disconnect");
-        ui_.combo_dev_serial_available->setEnabled(false);
-        ui_.label_device_port->setStyleSheet("color: green;");
-        ui_.push_start_capture->setEnabled(true);
-        ui_.push_stop_capture->setEnabled(true);
-    } else {
-        ui_.push_connect->setText("Connect");
-        ui_.combo_dev_serial_available->setEnabled(true);
-        ui_.label_device_port->setStyleSheet("color: black;");
-        ui_.push_start_capture->setEnabled(false);
-        ui_.push_stop_capture->setEnabled(false);
-    }
+	connected_ = connected;
+	if (connected) {
+		ui_.push_connect->setText("Disconnect");
+		ui_.combo_dev_serial_available->setEnabled(false);
+		ui_.label_device_port->setStyleSheet("color: green;");
+		ui_.push_start_capture->setEnabled(true);
+		ui_.push_stop_capture->setEnabled(true);
+	} else {
+		ui_.push_connect->setText("Connect");
+		ui_.combo_dev_serial_available->setEnabled(true);
+		ui_.label_device_port->setStyleSheet("color: black;");
+		ui_.push_start_capture->setEnabled(false);
+		ui_.push_stop_capture->setEnabled(false);
+	}
 }
+
 void LittlebotGui::receiveDataStatus(const QVector<float> &data)
 {
-    if (data.size() < 4) {
-        this->showError("Insufficient status data received.");
-        return;
-    }
+	if (data.size() < 4) {
+		this->showError("Insufficient status data received.");
+		return;
+	}
 
-    auto velocity_left = data[0];
-    auto velocity_right = data[1];
-    auto position_left = data[2];
-    auto position_right = data[3];
+	auto velocity_left = data[0];
+	auto velocity_right = data[1];
+	auto position_left = data[2];
+	auto position_right = data[3];
 
-    auto current_index = plot_index_.empty() ? 0 : plot_index_.back() + 1;
-    plot_index_.push_back(current_index);
+	auto current_index = plot_index_.empty() ? 0 : plot_index_.back() + 1;
+	plot_index_.push_back(current_index);
 
-    status_velocity_left_.push_back(velocity_left);
-    status_velocity_right_.push_back(velocity_right);
-    status_position_left_.push_back(position_left);
-    status_position_right_.push_back(position_right);
+	status_velocity_left_.push_back(velocity_left);
+	status_velocity_right_.push_back(velocity_right);
+	status_position_left_.push_back(position_left);
+	status_position_right_.push_back(position_right);
 
-    if (plot_index_.size() > kMaxPoints) {
-        plot_index_.erase(plot_index_.begin());
-        status_velocity_left_.erase(status_velocity_left_.begin());
-        status_velocity_right_.erase(status_velocity_right_.begin());
-        status_position_left_.erase(status_position_left_.begin());
-        status_position_right_.erase(status_position_right_.begin());
-    }
+	if (plot_index_.size() > kMaxPoints) {
+		plot_index_.erase(plot_index_.begin());
+		status_velocity_left_.erase(status_velocity_left_.begin());
+		status_velocity_right_.erase(status_velocity_right_.begin());
+		status_position_left_.erase(status_position_left_.begin());
+		status_position_right_.erase(status_position_right_.begin());
+	}
 
-    this->updatePlots();
+	this->updatePlots();
 }
 
 void LittlebotGui::littlebotCommand(const std::string &text)
 {
-    QMessageBox::information(this, "Littlebot Message", QString::fromStdString(text));
+	QMessageBox::information(this, "Littlebot Message", QString::fromStdString(text));
 }
 
 void LittlebotGui::updateSetpoint()
 {
-    bool ok = false;
-    float new_setpoint = ui_.line_edit_setpoint->text().toFloat(&ok);
-    if (ok) {
-        setpoint_ = new_setpoint;
-        QVector<float> data;
-        data.append(setpoint_); // Left wheel
-        data.append(setpoint_); // Right wheel
-        emit sendVelocitiesCommand(data);
-    } else {
-        this->showError("Invalid setpoint value.");
-        ui_.line_edit_setpoint->setText(QString::number(setpoint_, 'f', 2));
-    }
+	bool ok = false;
+	float new_setpoint = ui_.line_edit_setpoint->text().toFloat(&ok);
+	if (ok) {
+		setpoint_ = new_setpoint;
+		QVector<float> data;
+		data.append(setpoint_); // Left wheel
+		data.append(setpoint_); // Right wheel
+		emit sendVelocitiesCommand(data);
+	} else {
+		this->showError("Invalid setpoint value.");
+		ui_.line_edit_setpoint->setText(QString::number(setpoint_, 'f', 2));
+	}
 }
 
 void LittlebotGui::savePlotDataToFile()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Save Plot Data", "", "CSV Files (*.csv);;All Files (*)");
-    if (fileName.isEmpty()) {
-        return; // User cancelled the dialog
-    }
+	QString fileName = QFileDialog::getSaveFileName(this, "Save Plot Data", "", "CSV Files (*.csv);;All Files (*)");
+	if (fileName.isEmpty()) {
+		return; // User cancelled the dialog
+	}
 
-    QFile file(fileName);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        this->showError("Could not open file for writing.");
-        return;
-    }
+	QFile file(fileName);
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		this->showError("Could not open file for writing.");
+		return;
+	}
 
-    QTextStream out(&file);
-    out << "Index,Velocity_Left,Velocity_Right,Position_Left,Position_Right\n";
-    size_t dataSize = plot_index_.size();
-    for (size_t i = 0; i < dataSize; ++i) {
-        out << plot_index_[i] << ","
-            << status_velocity_left_[i] << ","
-            << status_velocity_right_[i] << ","
-            << status_position_left_[i] << ","
-            << status_position_right_[i] << "\n";
-    }
+	QTextStream out(&file);
+	out << "Index,Velocity_Left,Velocity_Right,Position_Left,Position_Right\n";
+	size_t dataSize = plot_index_.size();
+	for (size_t i = 0; i < dataSize; ++i) {
+		out << plot_index_[i] << ","
+				<< status_velocity_left_[i] << ","
+				<< status_velocity_right_[i] << ","
+				<< status_position_left_[i] << ","
+				<< status_position_right_[i] << "\n";
+	}
 
-    file.close();
+	file.close();
 }
 
 // void LittlebotGui::updateStatusDisplay()

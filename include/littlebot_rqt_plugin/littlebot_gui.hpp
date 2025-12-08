@@ -72,7 +72,11 @@ public:
     /**
      * @brief Update the curves to plot with new data
      */
-    void updateCurvesToPlot();
+    void updateVelocitiesCurves();
+
+    void updateSetpointCurves();
+
+    // void updatePositionsCurves();
 
     /**
      * @brief Update the plots with the latest curves
