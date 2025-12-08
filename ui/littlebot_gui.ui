@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>553</width>
-    <height>381</height>
+    <width>714</width>
+    <height>391</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,7 +54,7 @@
     <rect>
      <x>50</x>
      <y>50</y>
-     <width>271</width>
+     <width>231</width>
      <height>19</height>
     </rect>
    </property>
@@ -66,24 +66,24 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>80</y>
-     <width>531</width>
+     <y>70</y>
+     <width>691</width>
      <height>291</height>
     </rect>
    </property>
    <property name="currentIndex">
     <number>0</number>
    </property>
-   <widget class="QWidget" name="tab">
+   <widget class="QWidget" name="telemetry">
     <attribute name="title">
-     <string>Tab 1</string>
+     <string>Telemetry</string>
     </attribute>
     <widget class="QwtPlot" name="qwt_plot">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>40</y>
-       <width>371</width>
+       <width>481</width>
        <height>200</height>
       </rect>
      </property>
@@ -91,8 +91,8 @@
     <widget class="QPushButton" name="push_start_capture">
      <property name="geometry">
       <rect>
-       <x>390</x>
-       <y>100</y>
+       <x>510</x>
+       <y>90</y>
        <width>121</width>
        <height>25</height>
       </rect>
@@ -104,8 +104,8 @@
     <widget class="QPushButton" name="push_stop_capture">
      <property name="geometry">
       <rect>
-       <x>390</x>
-       <y>130</y>
+       <x>510</x>
+       <y>120</y>
        <width>121</width>
        <height>25</height>
       </rect>
@@ -117,18 +117,18 @@
     <widget class="QLineEdit" name="line_edit_setpoint">
      <property name="geometry">
       <rect>
-       <x>460</x>
-       <y>60</y>
+       <x>580</x>
+       <y>50</y>
        <width>61</width>
        <height>27</height>
       </rect>
      </property>
     </widget>
-    <widget class="QLabel" name="label_port_2">
+    <widget class="QLabel" name="label_setpoint_title">
      <property name="geometry">
       <rect>
-       <x>390</x>
-       <y>70</y>
+       <x>510</x>
+       <y>60</y>
        <width>71</width>
        <height>19</height>
       </rect>
@@ -140,8 +140,8 @@
     <widget class="QPushButton" name="push_save">
      <property name="geometry">
       <rect>
-       <x>390</x>
-       <y>190</y>
+       <x>510</x>
+       <y>200</y>
        <width>121</width>
        <height>25</height>
       </rect>
@@ -150,16 +150,29 @@
       <string>Save</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="push_view">
+     <property name="geometry">
+      <rect>
+       <x>510</x>
+       <y>170</y>
+       <width>121</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>View</string>
+     </property>
+    </widget>
    </widget>
-   <widget class="QWidget" name="tab_2">
+   <widget class="QWidget" name="debug">
     <attribute name="title">
-     <string>Tab 2</string>
+     <string>Debug</string>
     </attribute>
     <widget class="QPushButton" name="push_get_status">
      <property name="geometry">
       <rect>
-       <x>270</x>
-       <y>80</y>
+       <x>280</x>
+       <y>190</y>
        <width>121</width>
        <height>25</height>
       </rect>
@@ -171,18 +184,18 @@
     <widget class="QLCDNumber" name="lcd_left_vel_status">
      <property name="geometry">
       <rect>
-       <x>110</x>
-       <y>110</y>
+       <x>120</x>
+       <y>220</y>
        <width>64</width>
        <height>23</height>
       </rect>
      </property>
     </widget>
-    <widget class="QLabel" name="left_lable_3">
+    <widget class="QLabel" name="lable_status_vel_title">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>110</y>
+       <x>40</x>
+       <y>220</y>
        <width>71</width>
        <height>20</height>
       </rect>
@@ -191,11 +204,11 @@
       <string>status vel:</string>
      </property>
     </widget>
-    <widget class="QLabel" name="left_lable_2">
+    <widget class="QLabel" name="lable_cmd_vel_title">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>50</y>
+       <x>20</x>
+       <y>160</y>
        <width>91</width>
        <height>19</height>
       </rect>
@@ -204,11 +217,11 @@
       <string>cammand vel:</string>
      </property>
     </widget>
-    <widget class="QLabel" name="left_lable">
+    <widget class="QLabel" name="lable_left_col">
      <property name="geometry">
       <rect>
-       <x>110</x>
-       <y>20</y>
+       <x>120</x>
+       <y>130</y>
        <width>66</width>
        <height>19</height>
       </rect>
@@ -220,8 +233,8 @@
     <widget class="QLCDNumber" name="lcd_right_pos_status">
      <property name="geometry">
       <rect>
-       <x>190</x>
-       <y>80</y>
+       <x>200</x>
+       <y>190</y>
        <width>64</width>
        <height>23</height>
       </rect>
@@ -230,8 +243,8 @@
     <widget class="QLCDNumber" name="lcd_right_vel_status">
      <property name="geometry">
       <rect>
-       <x>190</x>
-       <y>110</y>
+       <x>200</x>
+       <y>220</y>
        <width>64</width>
        <height>23</height>
       </rect>
@@ -240,8 +253,8 @@
     <widget class="QLineEdit" name="edit_right_cmd">
      <property name="geometry">
       <rect>
-       <x>190</x>
-       <y>50</y>
+       <x>200</x>
+       <y>160</y>
        <width>71</width>
        <height>25</height>
       </rect>
@@ -250,18 +263,18 @@
     <widget class="QLCDNumber" name="lcd_left_pos_status">
      <property name="geometry">
       <rect>
-       <x>110</x>
-       <y>80</y>
+       <x>120</x>
+       <y>190</y>
        <width>64</width>
        <height>23</height>
       </rect>
      </property>
     </widget>
-    <widget class="QLabel" name="left_lable_4">
+    <widget class="QLabel" name="lable_status_pos_title">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>80</y>
+       <x>40</x>
+       <y>190</y>
        <width>81</width>
        <height>20</height>
       </rect>
@@ -273,18 +286,18 @@
     <widget class="QLineEdit" name="edit_left_cmd">
      <property name="geometry">
       <rect>
-       <x>110</x>
-       <y>50</y>
+       <x>120</x>
+       <y>160</y>
        <width>71</width>
        <height>25</height>
       </rect>
      </property>
     </widget>
-    <widget class="QLabel" name="right_label">
+    <widget class="QLabel" name="label_right_col">
      <property name="geometry">
       <rect>
-       <x>190</x>
-       <y>20</y>
+       <x>200</x>
+       <y>130</y>
        <width>66</width>
        <height>19</height>
       </rect>
@@ -296,14 +309,37 @@
     <widget class="QPushButton" name="push_set_cmd">
      <property name="geometry">
       <rect>
-       <x>270</x>
-       <y>50</y>
+       <x>280</x>
+       <y>160</y>
        <width>121</width>
        <height>25</height>
       </rect>
      </property>
      <property name="text">
-      <string>Send Command</string>
+      <string>Send</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_prot_data_title">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>111</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Protobuf data:</string>
+     </property>
+    </widget>
+    <widget class="QTextBrowser" name="text_proto_data">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>661</width>
+       <height>91</height>
+      </rect>
      </property>
     </widget>
    </widget>
