@@ -60,11 +60,6 @@ public:
     ~LittlebotGui() override = default;
 
     /**
-     * @brief Print the protobuf protocol message to the GUI
-     */
-    void printProtocolMessage();
-
-    /**
      * @brief Update the status display in the GUI
      */
     void updateStatusDisplay(const QVector<float> &data);
@@ -117,13 +112,13 @@ public slots:
 
     void updateWidgetsWithConnectionState(bool connected);
 
-    void receiveDataStatus(const QVector<float> &data);
+    void updateWidgetsWithDataStatus(const QVector<float> &data);
 
     void updateSetpoint();
 
     void savePlotDataToFile();
 
-    void receiveProtocolMessage(const QString &message);
+    void printProtocolMessage(const QString &message);
 private:
     /**
      * @brief Get the status of the Littlebot

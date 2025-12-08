@@ -332,7 +332,7 @@
       <string>Protobuf data:</string>
      </property>
     </widget>
-    <widget class="QTextBrowser" name="text_proto_data">
+    <widget class="QTextBrowser" name="text_browser_protocol">
      <property name="geometry">
       <rect>
        <x>10</x>

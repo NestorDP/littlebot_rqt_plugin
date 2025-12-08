@@ -29,7 +29,8 @@ LittlebotRqtPlugin::LittlebotRqtPlugin()
 
   connect(comm_, &LittlebotComm::errorOccurred, gui_, &LittlebotGui::showError);
   connect(comm_, &LittlebotComm::connectionStatus, gui_, &LittlebotGui::updateWidgetsWithConnectionState);
-  connect(comm_, &LittlebotComm::sendDataStatus, gui_, &LittlebotGui::receiveDataStatus);
+  connect(comm_, &LittlebotComm::sendDataStatus, gui_, &LittlebotGui::updateWidgetsWithDataStatus);
+  connect(comm_, &LittlebotComm::sendProtocolMessage, gui_, &LittlebotGui::printProtocolMessage);
 
   createPublisher();
   createSubscriber();

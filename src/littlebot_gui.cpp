@@ -167,7 +167,7 @@ void LittlebotGui::updateWidgetsWithConnectionState(bool connected)
 	}
 }
 
-void LittlebotGui::receiveDataStatus(const QVector<float> &data)
+void LittlebotGui::updateWidgetsWithDataStatus(const QVector<float> &data)
 {
 	if (data.size() < 4) {
 		this->showError("Insufficient status data received.");
@@ -200,7 +200,6 @@ void LittlebotGui::receiveDataStatus(const QVector<float> &data)
 	}
 	else {
 		this->updateStatusDisplay(data);
-		// this->printProtocolMessage();
 	}
 }
 
@@ -263,6 +262,16 @@ void LittlebotGui::updateStatusDisplay(const QVector<float> &data)
         QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Failed to update status display: ") + ex.what(), QMessageBox::Ok, this);
         msgBox.exec();
     }
+}
+
+void LittlebotGui::printProtocolMessage(const QString &message)
+{
+	try {
+		ui_.text_browser_protocol->append(message);
+	} catch (const std::exception &e) {
+		QMessageBox msgBox(QMessageBox::Critical, "LittleBot", QString("Failed to print protocol message: ") + e.what(), QMessageBox::Ok, this);
+		msgBox.exec();
+	}
 }
 
 }  // namespace littlebot_rqt_plugin
