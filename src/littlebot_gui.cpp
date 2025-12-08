@@ -38,12 +38,12 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 
     // connect(ui_.push_set_cmd, &QPushButton::clicked, this, &LittlebotGui::sendCommand);
 
-    connect(ui_.push_get_status, &QPushButton::clicked, this, 
-		[this]() { emit requestDataStatus(true); });
+
     connect(ui_.line_edit_setpoint, &QLineEdit::editingFinished, this, &LittlebotGui::updateSetpoint);
     connect(ui_.push_start_capture, &QPushButton::clicked, this, &LittlebotGui::startCapture);
     connect(ui_.push_stop_capture, &QPushButton::clicked, this, &LittlebotGui::stopCapture);
-    
+    connect(ui_.push_get_status, &QPushButton::clicked, this, 
+		[this]() { emit requestDataStatus(true); });   
     connect(ui_.combo_dev_serial_available, QOverload<int>::of(&QComboBox::activated),
         [this](int index) {this->updateAvailableDevices();
     });
@@ -215,8 +215,7 @@ void LittlebotGui::updateSetpoint()
 	if (ok) {
 		setpoint_ = new_setpoint;
 		QVector<float> data;
-		data.append(setpoint_); // Left wheel
-		data.append(setpoint_); // Right wheel
+		data.append(setpoint_);
 		emit sendVelocitiesCommand(data);
 	} else {
 		this->showError("Invalid setpoint value.");
@@ -228,7 +227,7 @@ void LittlebotGui::savePlotDataToFile()
 {
 	QString fileName = QFileDialog::getSaveFileName(this, "Save Plot Data", "", "CSV Files (*.csv);;All Files (*)");
 	if (fileName.isEmpty()) {
-		return; // User cancelled the dialog
+		return;
 	}
 
 	QFile file(fileName);
