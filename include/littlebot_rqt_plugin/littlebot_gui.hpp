@@ -50,6 +50,7 @@ class LittlebotGui : public QDialog
 public:
     /**
      * @brief Construct a new Littlebot GUI object
+     * 
      * @param parent Parent widget
      */
     explicit LittlebotGui(QWidget *parent = nullptr);
@@ -61,6 +62,8 @@ public:
 
     /**
      * @brief Update the status display in the GUI
+     * 
+     * @param data Status data to display
      */
     void updateStatusDisplay(const QVector<float> &data);
 
@@ -92,33 +95,84 @@ signals:
      */
     void littlebotStatus();
 
+    /**
+     * @brief Signal emitted to connect to the hardware
+     * 
+     * @param portName Name of the serial port
+     */
     void connectHardware(QString portName);
 
+    /**
+     * @brief Signal emitted to disconnect from the hardware
+     */
     void disconnectHardware();
 
+    /**
+     * @brief Signal emitted to send velocity commands to the Littlebot
+     * 
+     * @param data Velocity command data
+     */
     void sendVelocitiesCommand(const QVector<float> &data);
 
+    /**
+     * @brief Signal emitted to start data capture
+     */
     void startCapture();
 
+    /**
+     * @brief Signal emitted to stop data capture
+     */
     void stopCapture();
 
+    /**
+     * @brief Signal emitted to request data status
+     * 
+     * @param debug Flag to indicate if debug information is requested
+     */
     void requestDataStatus(const bool debug);
 
 public slots:
-
+    /**
+     * @brief Slot to handle Littlebot command input from ROS
+     */
     void littlebotCommand(const std::string &text);
 
+    /**
+     * @brief Slot to handle error messages
+     * 
+     * @param message Error message to display
+     */
     void showError(const QString &message);
 
+    /**
+     * @brief Update the GUI widgets based on the connection state
+     */
     void updateWidgetsWithConnectionState(bool connected);
 
+    /**
+     * @brief Update the GUI widgets based on the data status
+     * 
+     * @param data Data status to update the widgets with
+     */
     void updateWidgetsWithDataStatus(const QVector<float> &data);
 
+    /**
+     * @brief Update the setpoint based on the GUI input
+     */
     void updateSetpoint();
 
+    /**
+     * @brief Save the plot data to a file
+     */
     void savePlotDataToFile();
 
+    /**
+     * @brief Print a protocol message from hardware abstraction to the GUI
+     * 
+     * @param message Message to print
+     */
     void printProtocolMessage(const QString &message);
+
 private:
     /**
      * @brief Get the status of the Littlebot
