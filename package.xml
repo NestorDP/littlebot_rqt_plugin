@@ -4,11 +4,11 @@
 
   <name>littlebot_rqt_plugin</name>
   <version>0.0.0</version>
-  <description>
-    A GUI for the LittleBot robot.
-  </description>
-  <license>GNU General Public License</license>
+  <description>A GUI for the LittleBot robot.</description>
+
   <maintainer email="nestor-dp@hotmail.com">Nestor Neto</maintainer>
+
+  <license>GPL-3.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
