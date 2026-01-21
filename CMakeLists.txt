@@ -1,8 +1,12 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.20)
 project(littlebot_rqt_plugin)
 
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 20)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 set(CMAKE_AUTOMOC ON)
@@ -120,6 +124,17 @@ install(DIRECTORY ui launch scripts
 pluginlib_export_plugin_description_file(rqt_gui "plugin.xml")
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
+
+#Testing
+if(BUILD_TESTING)
+  find_package(ament_cmake_gmock REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_lint_auto REQUIRED)
+
+  # Lint tests
+  ament_lint_auto_find_test_dependencies()
+endif()
+
 
 
 ament_package()

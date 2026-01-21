@@ -1,3 +1,18 @@
+// @ Copyright 2025-2026 Nestor Neto
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #pragma once
 
 #include <rqt_gui_cpp/plugin.h>
@@ -19,14 +34,14 @@ class LittlebotRqtPlugin : public rqt_gui_cpp::Plugin
 
 public:
   LittlebotRqtPlugin();
-  
+
   ~LittlebotRqtPlugin() override = default;
 
 signals:
-  void littlebotCommand(const std::string &text);
+  void littlebotCommand(const std::string & text);
 
 private:
-  void initPlugin(qt_gui_cpp::PluginContext& context) override;
+  void initPlugin(qt_gui_cpp::PluginContext & context) override;
 
   void handleSpinOnTimer();
 
@@ -45,8 +60,7 @@ private:
   rclcpp::Node::SharedPtr node_;
 
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
-  
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscriber_;
 
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscriber_;
 };
 }  // namespace littlebot_rqt_plugin

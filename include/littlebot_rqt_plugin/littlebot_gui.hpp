@@ -1,4 +1,4 @@
-// @ Copyright 2023-2025 Nestor Neto
+// @ Copyright 2023-2026 Nestor Neto
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,23 +19,26 @@
  * To more information about the serial library used,
  * please visit: https://github.com/NestorDP/cppserial
  */
-#include "libserial/ports.hpp"
-#include "libserial/device.hpp"
-
-#include "ui_littlebot_gui.h"
-
-#include <QFileDialog>
-#include <QFile>
-#include <QTextStream>
-#include <QMessageBox>
-
+#include <qwt_legend.h>
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
-#include <qwt_legend.h>
+
+#include <QFile>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QThread>
+#include <QTextStream>
 #include <QVector>
-#include <QThread> // for QThread::msleep
+
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "libserial/device.hpp"
+#include "libserial/ports.hpp"
 
 #include "littlebot_rqt_plugin/littlebot_comm.hpp"
+#include "ui_littlebot_gui.h" // NOLINT: include order
 
 namespace littlebot_rqt_plugin
 {
@@ -45,80 +48,132 @@ namespace littlebot_rqt_plugin
  */
 class LittlebotGui : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    /**
-     * @brief Construct a new Littlebot GUI object
-     * @param parent Parent widget
-     */
-    explicit LittlebotGui(QWidget *parent = nullptr);
+  /**
+   * @brief Construct a new Littlebot GUI object
+   *
+   * @param parent Parent widget
+   */
+  explicit LittlebotGui(QWidget *parent = nullptr);
 
-    /**
-     * @brief Destroy the Littlebot GUI object
-     */
-    ~LittlebotGui() override = default;
+  /**
+   * @brief Destroy the Littlebot GUI object
+   */
+  ~LittlebotGui() override = default;
 
-    /**
-     * @brief Update the status display in the GUI
-     */
-    void updateStatusDisplay(const QVector<float> &data);
+  /**
+   * @brief Update the status display in the GUI
+   *
+   * @param data Status data to display
+   */
+  void updateStatusDisplay(const QVector<float> & data);
 
-    /**
-     * @brief Update the list of available serial devices
-     */
-    void updateAvailableDevices();
+  /**
+   * @brief Update the list of available serial devices
+   */
+  void updateAvailableDevices();
 
-    /**
-     * @brief Update the curves to plot with new data
-     */
-    void updateVelocitiesCurves();
+  /**
+   * @brief Update the curves to plot with new data
+   */
+  void updateVelocitiesCurves();
 
-    /**
-     * @brief Update the setpoint curve to plot with new data
-     */
-    void updateSetpointCurves();
+  /**
+   * @brief Update the setpoint curve to plot with new data
+   */
+  void updateSetpointCurves();
 
-    // void updatePositionsCurves();
-
-    /**
-     * @brief Update the plots with the latest curves
-     */
-    void updatePlots();
+  /**
+   * @brief Update the plots with the latest curves
+   */
+  void updatePlots();
 
 signals:
+  /**
+   * @brief Signal emitted when Littlebot status is requested
+   */
+  void littlebotStatus();
+
+  /**
+   * @brief Signal emitted to connect to the hardware
+   *
+   * @param portName Name of the serial port
+   */
+  void connectHardware(QString portName);
+
+  /**
+   * @brief Signal emitted to disconnect from the hardware
+   */
+  void disconnectHardware();
+
+  /**
+   * @brief Signal emitted to send velocity commands to the Littlebot
+   *
+   * @param data Velocity command data
+   */
+  void sendVelocitiesCommand(const QVector<float> & data);
+
     /**
-     * @brief Signal emitted when Littlebot status is requested
+     * @brief Signal emitted to start data capture
      */
-    void littlebotStatus();
+  void startCapture();
 
-    void connectHardware(QString portName);
+  /**
+   * @brief Signal emitted to stop data capture
+   */
+  void stopCapture();
 
-    void disconnectHardware();
-
-    void sendVelocitiesCommand(const QVector<float> &data);
-
-    void startCapture();
-
-    void stopCapture();
-
-    void requestDataStatus(const bool debug);
+  /**
+   * @brief Signal emitted to request data status
+   *
+   * @param debug Flag to indicate if debug information is requested
+   */
+  void requestDataStatus(const bool debug);
 
 public slots:
+  /**
+   * @brief Slot to handle Littlebot command input from ROS
+   */
+  void littlebotCommand(const std::string & text);
 
-    void littlebotCommand(const std::string &text);
+  /**
+   * @brief Slot to handle error messages
+   *
+   * @param message Error message to display
+   */
+  void showError(const QString & message);
 
-    void showError(const QString &message);
+  /**
+   * @brief Update the GUI widgets based on the connection state
+   */
+  void updateWidgetsWithConnectionState(bool connected);
 
-    void updateWidgetsWithConnectionState(bool connected);
+  /**
+   * @brief Update the GUI widgets based on the data status
+   *
+   * @param data Data status to update the widgets with
+   */
+  void updateWidgetsWithDataStatus(const QVector<float> & data);
 
-    void updateWidgetsWithDataStatus(const QVector<float> &data);
+  /**
+   * @brief Update the setpoint based on the GUI input
+   */
+  void updateSetpoint();
 
-    void updateSetpoint();
+  /**
+   * @brief Save the plot data to a file
+   */
+  void savePlotDataToFile();
 
-    void savePlotDataToFile();
+  /**
+   * @brief Print a protocol message from hardware abstraction to the GUI
+   *
+   * @param message Message to print
+   */
+  void printProtocolMessage(const QString & message);
 
-    void printProtocolMessage(const QString &message);
 private:
     /**
      * @brief Get the status of the Littlebot
@@ -130,55 +185,55 @@ private:
      */
     // void setCommand();
 
-    /**
-     * @brief UI object for the Littlebot GUI
-     */
-    Ui::LittlebotGui ui_;
+  /**
+   * @brief UI object for the Littlebot GUI
+   */
+  Ui::LittlebotGui ui_;
 
-    /**
-     * @brief Available serial devices
-     */
-    libserial::Ports available_devices_;
+  /**
+   * @brief Available serial devices
+   */
+  libserial::Ports available_devices_;
 
-    /**
-     * @brief Selected device index
-     */
-    uint16_t selected_device_index_{0};
+  /**
+   * @brief Selected device index
+   */
+  uint16_t selected_device_index_{0};
 
-    /**
-     * @brief Current number of available devices
-     */
-    int current_number_of_devices_{0};
+  /**
+   * @brief Current number of available devices
+   */
+  int current_number_of_devices_{0};
 
-    float command_velocity_setpoint_left_{0.0f};
+  float command_velocity_setpoint_left_{0.0f};
 
-    float command_velocity_setpoint_right_{0.0f};
+  float command_velocity_setpoint_right_{0.0f};
 
-    std::vector<double> command_velocity_left_{0.0f};
-    
-    std::vector<double> command_velocity_right_{0.0f};
+  std::vector<double> command_velocity_left_{0.0f};
 
-    std::vector<double> status_velocity_left_{0.0f};
+  std::vector<double> command_velocity_right_{0.0f};
 
-    std::vector<double> status_velocity_right_{0.0f};
+  std::vector<double> status_velocity_left_{0.0f};
 
-    std::vector<double> status_position_left_{0.0f};
+  std::vector<double> status_velocity_right_{0.0f};
 
-    std::vector<double> status_position_right_{0.0f};
+  std::vector<double> status_position_left_{0.0f};
 
-    std::vector<double> plot_index_;
+  std::vector<double> status_position_right_{0.0f};
 
-    bool connected_{false};
+  std::vector<double> plot_index_;
 
-    QwtPlotCurve *wheel_velocity_curve_{nullptr};
+  bool connected_{false};
 
-    QwtPlotCurve *setpoint_curve_{nullptr};
+  QwtPlotCurve *wheel_velocity_curve_{nullptr};
 
-    static constexpr int kMaxPoints{100};
+  QwtPlotCurve *setpoint_curve_{nullptr};
 
-    float setpoint_{0.0f};
+  static constexpr int kMaxPoints{100};
 
-    std::shared_ptr<std::vector<double>> status_velocity_left_ptr_{nullptr};
+  float setpoint_{0.0f};
+
+  std::shared_ptr<std::vector<double>> status_velocity_left_ptr_{nullptr};
 };
 
 }  // namespace littlebot_rqt_plugin
