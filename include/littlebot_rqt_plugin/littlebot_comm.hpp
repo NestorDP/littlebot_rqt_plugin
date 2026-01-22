@@ -26,6 +26,7 @@
 #include "littlebot_base/littlebot_driver.hpp"
 #include "littlebot_base/serial_port.hpp"
 #include "littlebot_base/ros_rt_buffer.hpp"
+#include "littlebot_base/types.hpp"
 
 namespace littlebot_rqt_plugin
 {
