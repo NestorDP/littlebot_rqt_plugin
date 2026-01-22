@@ -20,6 +20,7 @@ find_package(qt_gui_cpp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(littlebot_base REQUIRED)
+find_package(realtime_tools REQUIRED)
 
 # Find libserial using pkg-config
 find_package(PkgConfig REQUIRED)
@@ -75,13 +76,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  ${rclcpp_LIBRARIES}
-  ${qt_gui_cpp_LIBRARIES}
-  ${rqt_gui_cpp_LIBRARIES}
-  ${std_msgs_LIBRARIES}
   ${QWT_LIBRARIES}
   PkgConfig::LIBSERIAL
   Qt5::Widgets
+  littlebot_base::littlebot_driver
+  littlebot_base::serial_port
 )
 
 ament_target_dependencies(${PROJECT_NAME} PUBLIC
@@ -91,7 +90,7 @@ ament_target_dependencies(${PROJECT_NAME} PUBLIC
   rclcpp
   rqt_gui_cpp
   std_msgs
-  littlebot_base
+  realtime_tools
 )
 
 install(
@@ -102,9 +101,9 @@ install(
 install(
   TARGETS ${PROJECT_NAME}
   EXPORT ${PROJECT_NAME}
-  ARCHIVE DESTINATION lib/${PROJECT_NAME}
-  LIBRARY DESTINATION lib/${PROJECT_NAME}
-  RUNTIME DESTINATION bin/${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
 
