@@ -33,47 +33,125 @@ class LittlebotComm : public QObject {
   Q_OBJECT
 
 public:
+  /**
+  * @brief Construct a new Littlebot Comm object
+  * 
+  * @param parent Parent QObject
+  */
   explicit LittlebotComm(QObject *parent = nullptr);
 
 signals:
-  void sendDataStatus(const QVector<float> & data);
+  /**
+   * @brief Signal emitted when new status data is available
+   * 
+   * @param data Status data
+   */
+  void dataStatus(const QVector<float> & data);
 
+  /**
+   * @brief Signal emitted when an error occurs
+   *
+   * @param message Protocol message
+   */
   void errorOccurred(const QString & message);
 
-  void sendProtocolMessage(const QString & message);
+  /**
+   * @brief Signal emitted to send protocol messages
+   *
+   * @param message Protocol message
+   * 
+   * @note This signal is used for debugging purposes
+   */
+  void protocolMessage(const QString & message);
 
+  /**
+   * @brief Signal emitted to indicate connection status
+   * 
+   * @param connected True if connected, false otherwise
+   */
   void connectionStatus(bool connected);
 
 public slots:
+  /**
+   * @brief Slot to connect to the hardware
+   * 
+   * @param portName Name of the serial port
+   */
   void connectHardware(QString portName);
 
+  /**
+   * @brief Slot to disconnect from the hardware
+   */
   void disconnectHardware();
 
-  void receiveVelocitiesCommand(const QVector<float> & data);
+  /**
+   * @brief Slot to receive velocity commands from GUI
+   * 
+   * @param data Velocity command data
+   */
+  void velocitiesCommand(const QVector<float> & data);
 
+  /**
+   * @brief Slot to start the data capture timer
+   */
   void startTimer();
 
+  /**
+   * @brief Slot to stop the data capture timer
+   */
   void stopTimer();
 
-  void updateStatusDataFromHardware(const bool debug);
+  /**
+   * @brief Slot to update status data from hardware
+   * 
+   * @param debug Flag to indicate if debug information is requested
+   */
+  void updateStatusFromHardware(const bool debug);
 
 private:
+  /**
+   * @brief Littlebot driver instance
+   */
   std::shared_ptr<littlebot_base::LittlebotDriver> littlebot_driver_;
 
+  /**
+   * @brief Serial port interface
+   */
   std::shared_ptr<littlebot_base::SerialPort> serial_port_;
 
+  /**
+   * @brief RT buffer for wheel state data
+   */
   std::shared_ptr<littlebot_base::IRTBuffer<littlebot_base::WheelRTData>> rt_state_buffer_;
 
+  /**
+   * @brief RT buffer for wheel command data
+   */
   std::shared_ptr<littlebot_base::IRTBuffer<littlebot_base::WheelRTData>> rt_command_buffer_;
 
+  /**
+   * @brief Command velocities for the wheels
+   */
   std::map<std::string, float> command_velocities_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
 
+  /**
+   * @brief Status positions for the wheels
+   */
   std::map<std::string, float> status_positions_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
 
+  /**
+   * @brief Status velocities for the wheels
+   */
   std::map<std::string, float> status_velocities_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
 
+  /**
+   * @brief Timer for periodic data capture
+   */
   QTimer *timer_;
 
+  /**
+   * @brief Timer interval in milliseconds
+   */
   static constexpr int kTimerInterval_ms{500};
 };
 }  // namespace littlebot_rqt_plugin

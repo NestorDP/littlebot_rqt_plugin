@@ -24,7 +24,7 @@ LittlebotComm::LittlebotComm(QObject *parent)
   timer_(new QTimer(this))
 {
   connect(timer_, &QTimer::timeout, this,
-    [this]() {this->updateStatusDataFromHardware(false);});
+    [this]() {this->updateStatusFromHardware(false);});
 }
 
 void LittlebotComm::connectHardware(QString portName)
@@ -76,7 +76,7 @@ void LittlebotComm::disconnectHardware()
   emit connectionStatus(false);
 }
 
-void LittlebotComm::receiveVelocitiesCommand(const QVector<float> & data)
+void LittlebotComm::velocitiesCommand(const QVector<float> & data)
 {
   if (data.size() < 2) {
     emit errorOccurred("Insufficient velocity data received.");
@@ -100,7 +100,7 @@ void LittlebotComm::stopTimer()
   }
 }
 
-void LittlebotComm::updateStatusDataFromHardware(const bool debug)
+void LittlebotComm::updateStatusFromHardware(const bool debug)
 {
     // try {
     //     if (littlebot_driver_) {
@@ -118,9 +118,9 @@ void LittlebotComm::updateStatusDataFromHardware(const bool debug)
 
     //             if (debug) {
     //                 QString message{"Message Test!"};
-    //                 emit sendProtocolMessage(message);
+    //                 emit protocolMessage(message);
     //             }
-    //             emit sendDataStatus(data_status);
+    //             emit dataStatus(data_status);
     //         } else {
     //             throw std::runtime_error("Failed to receive status data from hardware.");
     //         }
