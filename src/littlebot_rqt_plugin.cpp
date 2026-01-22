@@ -41,21 +41,21 @@ LittlebotRqtPlugin::LittlebotRqtPlugin()
           &LittlebotComm::connectHardware);
   connect(gui_, &LittlebotGui::disconnectHardware, comm_,
           &LittlebotComm::disconnectHardware);
-  connect(gui_, &LittlebotGui::sendVelocitiesCommand, comm_,
+  connect(gui_, &LittlebotGui::velocitiesCommand, comm_,
           &LittlebotComm::velocitiesCommand);
   connect(gui_, &LittlebotGui::startCapture, comm_,
           &LittlebotComm::startTimer);
   connect(gui_, &LittlebotGui::stopCapture, comm_,
           &LittlebotComm::stopTimer);
   connect(gui_, &LittlebotGui::requestDataStatus, comm_,
-          &LittlebotComm::updateStatusFromHardware);
+          &LittlebotComm::requestStatusFromHardware);
 
   connect(comm_, &LittlebotComm::errorOccurred, gui_,
           &LittlebotGui::showError);
   connect(comm_, &LittlebotComm::connectionStatus, gui_,
-          &LittlebotGui::updateWidgetsWithConnectionState);
+          &LittlebotGui::updateConnectionState);
   connect(comm_, &LittlebotComm::dataStatus, gui_,
-          &LittlebotGui::updateWidgetsWithDataStatus);
+          &LittlebotGui::updateDataStatus);
   connect(comm_, &LittlebotComm::protocolMessage, gui_,
           &LittlebotGui::printProtocolMessage);
 

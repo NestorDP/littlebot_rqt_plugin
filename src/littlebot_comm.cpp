@@ -24,29 +24,23 @@ LittlebotComm::LittlebotComm(QObject *parent)
   timer_(new QTimer(this))
 {
   connect(timer_, &QTimer::timeout, this,
-    [this]() {this->updateStatusFromHardware(false);});
+    [this]() {this->requestStatusFromHardware(false);});
 }
 
 void LittlebotComm::connectHardware(QString portName)
 {
-  // Create a pointer to the serial port
   serial_port_ = std::make_shared<littlebot_base::SerialPort>();
 
-  // Open the serial port and check for errors
   if (!serial_port_->open(portName.toStdString(), 115200)) {
     emit errorOccurred("Failed to open serial port: " + portName);
     return;
   }
 
-  // Create RT buffers for state and command data
-  // Create RT buffers for state and command data
   rt_state_buffer_ = std::make_shared<littlebot_base::RosRTBuffer>();
   rt_command_buffer_ = std::make_shared<littlebot_base::RosRTBuffer>();
   std::vector<std::string> joint_names{"left_wheel", "right_wheel"};
 
   try {
-    // Create the Littlebot driver instance and pass the serial port, RT buffers
-    // and joint names
     littlebot_driver_ =
       std::make_shared<littlebot_base::LittlebotDriver>(
         serial_port_,
@@ -100,7 +94,7 @@ void LittlebotComm::stopTimer()
   }
 }
 
-void LittlebotComm::updateStatusFromHardware(const bool debug)
+void LittlebotComm::requestStatusFromHardware(const bool debug)
 {
     // try {
     //     if (littlebot_driver_) {

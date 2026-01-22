@@ -106,7 +106,7 @@ public slots:
    * 
    * @param debug Flag to indicate if debug information is requested
    */
-  void updateStatusFromHardware(const bool debug);
+  void requestStatusFromHardware(const bool debug);
 
 private:
   /**

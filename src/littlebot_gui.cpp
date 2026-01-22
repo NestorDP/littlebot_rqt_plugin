@@ -170,7 +170,7 @@ void LittlebotGui::showError(const QString & message)
   msgBox.exec();
 }
 
-void LittlebotGui::updateWidgetsWithConnectionState(bool connected)
+void LittlebotGui::updateConnectionState(bool connected)
 {
   connected_ = connected;
   if (connected) {
@@ -187,7 +187,7 @@ void LittlebotGui::updateWidgetsWithConnectionState(bool connected)
     ui_.push_stop_capture->setEnabled(false);
   }
 }
-void LittlebotGui::updateWidgetsWithDataStatus(const QVector<float> & data)
+void LittlebotGui::updateDataStatus(const QVector<float> & data)
 {
   if (data.size() < 4) {
     this->showError("Insufficient status data received.");
@@ -236,7 +236,7 @@ void LittlebotGui::updateSetpoint()
     setpoint_ = new_setpoint;
     QVector<float> data;
     data.append(setpoint_);
-    emit sendVelocitiesCommand(data);
+    emit velocitiesCommand(data);
   } else {
     this->showError("Invalid setpoint value.");
     ui_.line_edit_setpoint->setText(QString::number(setpoint_, 'f', 2));

@@ -113,7 +113,7 @@ signals:
    *
    * @param data Velocity command data
    */
-  void sendVelocitiesCommand(const QVector<float> & data);
+  void velocitiesCommand(const QVector<float> & data);
 
     /**
      * @brief Signal emitted to start data capture
@@ -146,16 +146,23 @@ public slots:
   void showError(const QString & message);
 
   /**
-   * @brief Update the GUI widgets based on the connection state
+   * @brief Print a protocol message from hardware abstraction to the GUI
+   *
+   * @param message Message to print
    */
-  void updateWidgetsWithConnectionState(bool connected);
+  void printProtocolMessage(const QString & message);
 
   /**
    * @brief Update the GUI widgets based on the data status
    *
    * @param data Data status to update the widgets with
    */
-  void updateWidgetsWithDataStatus(const QVector<float> & data);
+  void updateDataStatus(const QVector<float> & data);
+
+  /**
+   * @brief Update the GUI widgets based on the connection state
+   */
+  void updateConnectionState(bool connected);
 
   /**
    * @brief Update the setpoint based on the GUI input
@@ -166,13 +173,6 @@ public slots:
    * @brief Save the plot data to a file
    */
   void savePlotDataToFile();
-
-  /**
-   * @brief Print a protocol message from hardware abstraction to the GUI
-   *
-   * @param message Message to print
-   */
-  void printProtocolMessage(const QString & message);
 
 private:
     /**
