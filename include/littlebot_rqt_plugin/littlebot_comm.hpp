@@ -95,12 +95,12 @@ public slots:
   /**
    * @brief Slot to start the data capture timer
    */
-  void startTimer();
+  void startStreamTimer();
 
   /**
    * @brief Slot to stop the data capture timer
    */
-  void stopTimer();
+  void stopStreamTimer();
 
   /**
    * @brief Slot to update status data from hardware
@@ -108,6 +108,11 @@ public slots:
    * @param debug Flag to indicate if debug information is requested
    */
   void requestStatusFromHardware(const bool debug);
+
+  /**
+   * @brief Slot to get the latest data status
+   */
+  void getDataStatus();
 
 private:
   /**
@@ -131,28 +136,18 @@ private:
   std::shared_ptr<littlebot_base::IRTBuffer<littlebot_base::WheelRTData>> rt_command_buffer_;
 
   /**
-   * @brief Command velocities for the wheels
-   */
-  std::map<std::string, float> command_velocities_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
-
-  /**
-   * @brief Status positions for the wheels
-   */
-  std::map<std::string, float> status_positions_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
-
-  /**
-   * @brief Status velocities for the wheels
-   */
-  std::map<std::string, float> status_velocities_{{"left_wheel", 0.0f}, {"right_wheel", 0.0f}};
-
-  /**
    * @brief Timer for periodic data capture
    */
-  QTimer *timer_;
+  QTimer *hardware_request_timer_;
+
+  /**
+   * @brief Timer for status updates
+   */
+  QTimer *status_update_timer_;
 
   /**
    * @brief Timer interval in milliseconds
    */
-  static constexpr int kTimerInterval_ms{500};
+  static constexpr int kTimerInterval_ms{50};
 };
 }  // namespace littlebot_rqt_plugin

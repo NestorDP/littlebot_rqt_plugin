@@ -44,9 +44,9 @@ LittlebotRqtPlugin::LittlebotRqtPlugin()
   connect(gui_, &LittlebotGui::velocitiesCommand, comm_,
           &LittlebotComm::velocitiesCommand);
   connect(gui_, &LittlebotGui::startCapture, comm_,
-          &LittlebotComm::startTimer);
+          &LittlebotComm::startStreamTimer);
   connect(gui_, &LittlebotGui::stopCapture, comm_,
-          &LittlebotComm::stopTimer);
+          &LittlebotComm::stopStreamTimer);
   connect(gui_, &LittlebotGui::requestDataStatus, comm_,
           &LittlebotComm::requestStatusFromHardware);
 

@@ -21,9 +21,10 @@ namespace littlebot_rqt_plugin
 {
 LittlebotComm::LittlebotComm(QObject *parent)
 : QObject(parent),
-  timer_(new QTimer(this))
+  hardware_request_timer_(new QTimer(this)),
+  status_update_timer_(new QTimer(this))
 {
-  connect(timer_, &QTimer::timeout, this,
+  connect(hardware_request_timer_, &QTimer::timeout, this,
     [this]() {this->requestStatusFromHardware(false);});
 }
 
@@ -51,6 +52,10 @@ void LittlebotComm::connectHardware(QString portName)
     emit errorOccurred(QString::fromStdString(std::string("Connection failed: ") + ex.what()));
     return;
   }
+  if (!hardware_request_timer_->isActive()) {
+    this->hardware_request_timer_->start(kTimerInterval_ms);
+  }
+
   emit connectionStatus(true);
 }
 
@@ -67,6 +72,9 @@ void LittlebotComm::disconnectHardware()
         ex.what()));
     return;
   }
+    if (hardware_request_timer_->isActive()) {
+    this->hardware_request_timer_->stop();
+  }
   emit connectionStatus(false);
 }
 
@@ -76,58 +84,49 @@ void LittlebotComm::velocitiesCommand(const QVector<float> & data)
     emit errorOccurred("Insufficient velocity data received.");
     return;
   }
-  command_velocities_["left_wheel"] = data[0];
-  command_velocities_["right_wheel"] = data[1];
+  // command_velocities_["left_wheel"] = data[0];
+  // command_velocities_["right_wheel"] = data[1];
 }
 
-void LittlebotComm::startTimer()
+void LittlebotComm::startStreamTimer()
 {
-  if (!timer_->isActive()) {
-    timer_->start(kTimerInterval_ms);
+  if (!status_update_timer_->isActive()) {
+    this->status_update_timer_->start(kTimerInterval_ms);
   }
 }
 
-void LittlebotComm::stopTimer()
+void LittlebotComm::stopStreamTimer()
 {
-  if (timer_->isActive()) {
-    timer_->stop();
+  if (status_update_timer_->isActive()) {
+    this->status_update_timer_->stop();
   }
 }
 
 void LittlebotComm::requestStatusFromHardware(const bool debug)
 {
-    // try {
-    //     if (littlebot_driver_) {
-    //         littlebot_driver_->sendData('S');
-    //         if (littlebot_driver_->receiveData() == 'S') {
-    //             status_velocities_ = littlebot_driver_->getStatusVelocities();
-    //             status_positions_ = littlebot_driver_->getStatusPositions();
+  auto request_ok = littlebot_driver_->requestStatus();
+  if (!request_ok) {
+    emit errorOccurred(QString::fromStdString("Error during status update: "));
+    this->hardware_request_timer_->stop();
+  }
 
-    //             QVector<float> data_status{
-    //                 status_velocities_["left_wheel"],
-    //                 status_velocities_["right_wheel"],
-    //                 status_positions_["left_wheel"],
-    //                 status_positions_["right_wheel"]
-    //             };
+  if (debug) {
+    QString message{"Message Test!"};
+    emit protocolMessage(message);
+  }
+}
 
-    //             if (debug) {
-    //                 QString message{"Message Test!"};
-    //                 emit protocolMessage(message);
-    //             }
-    //             emit dataStatus(data_status);
-    //         } else {
-    //             throw std::runtime_error("Failed to receive status data from hardware.");
-    //         }
-    //     } else {
-    //         throw std::runtime_error("Littlebot driver not initialized.");
-    //     }
-    // } catch (const std::exception &ex) {
-    //     emit errorOccurred(
-    //         QString::fromStdString(
-    //             std::string("Error during status update: ") +
-    //             ex.what()));
-    //     this->stopTimer();
-    //     return;
-    // }
+void LittlebotComm::getDataStatus()
+{
+  littlebot_base::WheelRTData state;
+  littlebot_driver_->readRTData(state);
+
+  QVector<float> data;
+  data.append(state.status_position[0]);
+  data.append(state.status_position[1]);
+  data.append(state.status_velocity[0]);
+  data.append(state.status_velocity[1]);
+
+  emit dataStatus(data);
 }
 }  // namespace littlebot_rqt_plugin
