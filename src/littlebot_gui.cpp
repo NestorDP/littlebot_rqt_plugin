@@ -44,8 +44,8 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 
   connect(ui_.line_edit_setpoint, &QLineEdit::editingFinished, this,
           &LittlebotGui::updateSetpoint);
-  connect(ui_.push_start_capture, &QPushButton::clicked, this, &LittlebotGui::startCapture);
-  connect(ui_.push_stop_capture, &QPushButton::clicked, this, &LittlebotGui::stopCapture);
+  connect(ui_.push_start_capture, &QPushButton::clicked, this, &LittlebotGui::startStream);
+  connect(ui_.push_stop_capture, &QPushButton::clicked, this, &LittlebotGui::stopStream);
   connect(ui_.push_get_status, &QPushButton::clicked, this,
     [this]() {emit requestDataStatus(true);});
   connect(ui_.combo_dev_serial_available, QOverload<int>::of(&QComboBox::activated),
@@ -236,7 +236,7 @@ void LittlebotGui::updateSetpoint()
     setpoint_ = new_setpoint;
     QVector<float> data;
     data.append(setpoint_);
-    emit velocitiesCommand(data);
+    emit setVelocitiesCommand(data);
   } else {
     this->showError("Invalid setpoint value.");
     ui_.line_edit_setpoint->setText(QString::number(setpoint_, 'f', 2));

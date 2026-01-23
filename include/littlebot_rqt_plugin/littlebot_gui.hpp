@@ -113,17 +113,17 @@ signals:
    *
    * @param data Velocity command data
    */
-  void velocitiesCommand(const QVector<float> & data);
+  void setVelocitiesCommand(const QVector<float> & data);
 
     /**
      * @brief Signal emitted to start data capture
      */
-  void startCapture();
+  void startStream();
 
   /**
    * @brief Signal emitted to stop data capture
    */
-  void stopCapture();
+  void stopStream();
 
   /**
    * @brief Signal emitted to request data status

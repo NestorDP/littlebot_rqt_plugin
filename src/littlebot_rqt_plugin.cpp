@@ -41,11 +41,11 @@ LittlebotRqtPlugin::LittlebotRqtPlugin()
           &LittlebotComm::connectHardware);
   connect(gui_, &LittlebotGui::disconnectHardware, comm_,
           &LittlebotComm::disconnectHardware);
-  connect(gui_, &LittlebotGui::velocitiesCommand, comm_,
-          &LittlebotComm::velocitiesCommand);
-  connect(gui_, &LittlebotGui::startCapture, comm_,
+  connect(gui_, &LittlebotGui::setVelocitiesCommand, comm_,
+          &LittlebotComm::setVelocitiesCommand);
+  connect(gui_, &LittlebotGui::startStream, comm_,
           &LittlebotComm::startStreamTimer);
-  connect(gui_, &LittlebotGui::stopCapture, comm_,
+  connect(gui_, &LittlebotGui::stopStream, comm_,
           &LittlebotComm::stopStreamTimer);
   connect(gui_, &LittlebotGui::requestDataStatus, comm_,
           &LittlebotComm::requestStatusFromHardware);

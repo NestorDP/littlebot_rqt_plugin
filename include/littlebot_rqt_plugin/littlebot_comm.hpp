@@ -90,7 +90,7 @@ public slots:
    * 
    * @param data Velocity command data
    */
-  void velocitiesCommand(const QVector<float> & data);
+  void setVelocitiesCommand(const QVector<float> & data);
 
   /**
    * @brief Slot to start the data capture timer

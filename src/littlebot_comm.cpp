@@ -78,7 +78,7 @@ void LittlebotComm::disconnectHardware()
   emit connectionStatus(false);
 }
 
-void LittlebotComm::velocitiesCommand(const QVector<float> & data)
+void LittlebotComm::setVelocitiesCommand(const QVector<float> & data)
 {
   if (data.size() < 2) {
     emit errorOccurred("Insufficient velocity data received.");
