@@ -63,6 +63,14 @@ LittlebotGui::LittlebotGui(QWidget *parent)
       emit connectHardware(currentPortName);
     });
 
+  ui_.qwt_plot->setTitle("Left Wheel Velocity");
+  if (wheel_velocity_curve_ == nullptr) {
+    wheel_velocity_curve_ = new QwtPlotCurve();
+    wheel_velocity_curve_->attach(ui_.qwt_plot);
+  }
+
+  wheel_velocity_curve_->setPen(Qt::blue, 2);
+  wheel_velocity_curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
   this->updatePlots();
 }
 
@@ -111,56 +119,27 @@ void LittlebotGui::updateAvailableDevices()
 
 void LittlebotGui::updatePlots()
 {
-  ui_.qwt_plot->setTitle("Left Wheel Velocity");
-  // ui_.qwt_plot->setAxisTitle(QwtPlot::xBottom, "Index");
-  // ui_.qwt_plot->setAxisTitle(QwtPlot::yLeft, "Value");
-
-  if (wheel_velocity_curve_ == nullptr) {
-    wheel_velocity_curve_ = new QwtPlotCurve();
-    wheel_velocity_curve_->attach(ui_.qwt_plot);
-  }
-
-  if (setpoint_curve_ == nullptr) {
-    setpoint_curve_ = new QwtPlotCurve();
-    setpoint_curve_->attach(ui_.qwt_plot);
-  }
-
   this->updateVelocitiesCurves();
   this->updateSetpointCurves();
-
   ui_.qwt_plot->replot();
 }
 
 void LittlebotGui::updateVelocitiesCurves()
 {
-  wheel_velocity_curve_->setPen(Qt::blue, 2);
-  wheel_velocity_curve_->setRenderHint(
-      QwtPlotItem::RenderAntialiased, true);
-
-  if (plot_index_.size() != status_velocity_left_ptr_->size()) {
-    if (plot_index_.empty()) {
-      plot_index_.resize(status_velocity_left_ptr_->size());
-      for (size_t i = 0; i < status_velocity_left_ptr_->size(); ++i) {
-        plot_index_[i] = static_cast<double>(i);
-      }
-    }
+  if (!wheel_velocity_curve_) {
+    return;
   }
-  wheel_velocity_curve_->setSamples(
-    plot_index_.data(), status_velocity_left_ptr_->data(),
-    std::min(plot_index_.size(),
-              status_velocity_left_ptr_->size()));
+
+  wheel_velocity_curve_->setSamples(plot_x_, velocity_left_);
 }
 
 void LittlebotGui::updateSetpointCurves()
 {
-  setpoint_curve_->setPen(Qt::red, 2);
-  setpoint_curve_->setRenderHint(QwtPlotItem::RenderAntialiased,
-                                  true);
-  setpoint_curve_->setSamples(
-    plot_index_.data(),
-    std::vector<double>(status_velocity_left_ptr_->size(),
-                        setpoint_).data(),
-    status_velocity_left_ptr_->size());
+  if (!setpoint_curve_) {
+    return;
+  }
+
+  setpoint_curve_->setSamples(plot_x_, setpoint_curve_data_);
 }
 
 void LittlebotGui::showError(const QString & message)
