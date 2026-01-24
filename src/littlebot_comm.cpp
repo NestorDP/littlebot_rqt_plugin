@@ -26,6 +26,8 @@ LittlebotComm::LittlebotComm(QObject *parent)
 {
   connect(hardware_request_timer_, &QTimer::timeout, this,
     [this]() {this->requestStatusFromHardware(false);});
+  connect(status_update_timer_, &QTimer::timeout, this,
+    [this]() {this->getDataStatus();});
 }
 
 void LittlebotComm::connectHardware(QString portName)
@@ -53,7 +55,7 @@ void LittlebotComm::connectHardware(QString portName)
     return;
   }
   if (!hardware_request_timer_->isActive()) {
-    this->hardware_request_timer_->start(kTimerInterval_ms);
+    this->hardware_request_timer_->start(kRequestTimerInterval_ms);
   }
 
   emit connectionStatus(true);
@@ -91,7 +93,7 @@ void LittlebotComm::setVelocitiesCommand(const QVector<float> & data)
 void LittlebotComm::startStreamTimer()
 {
   if (!status_update_timer_->isActive()) {
-    this->status_update_timer_->start(kTimerInterval_ms);
+    this->status_update_timer_->start(kStatusUpdateTimerInterval_ms);
   }
 }
 

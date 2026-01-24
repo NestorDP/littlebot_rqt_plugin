@@ -148,6 +148,11 @@ private:
   /**
    * @brief Timer interval in milliseconds
    */
-  static constexpr int kTimerInterval_ms{50};
+  static constexpr int kRequestTimerInterval_ms{300};
+
+  /**
+   * @brief Timer interval in milliseconds
+   */
+  static constexpr int kStatusUpdateTimerInterval_ms{100};
 };
 }  // namespace littlebot_rqt_plugin
