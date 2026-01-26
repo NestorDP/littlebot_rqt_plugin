@@ -61,7 +61,7 @@ public:
   /**
    * @brief Destroy the Littlebot GUI object
    */
-  ~LittlebotGui() override = default;
+  ~LittlebotGui();
 
   /**
    * @brief Update the status display in the GUI
@@ -113,17 +113,17 @@ signals:
    *
    * @param data Velocity command data
    */
-  void sendVelocitiesCommand(const QVector<float> & data);
+  void setVelocitiesCommand(const QVector<float> & data);
 
     /**
      * @brief Signal emitted to start data capture
      */
-  void startCapture();
+  void startStream();
 
   /**
    * @brief Signal emitted to stop data capture
    */
-  void stopCapture();
+  void stopStream();
 
   /**
    * @brief Signal emitted to request data status
@@ -146,16 +146,23 @@ public slots:
   void showError(const QString & message);
 
   /**
-   * @brief Update the GUI widgets based on the connection state
+   * @brief Print a protocol message from hardware abstraction to the GUI
+   *
+   * @param message Message to print
    */
-  void updateWidgetsWithConnectionState(bool connected);
+  void printProtocolMessage(const QString & message);
 
   /**
    * @brief Update the GUI widgets based on the data status
    *
    * @param data Data status to update the widgets with
    */
-  void updateWidgetsWithDataStatus(const QVector<float> & data);
+  void updateDataStatus(const QVector<float> & data);
+
+  /**
+   * @brief Update the GUI widgets based on the connection state
+   */
+  void updateConnectionState(bool connected);
 
   /**
    * @brief Update the setpoint based on the GUI input
@@ -166,13 +173,6 @@ public slots:
    * @brief Save the plot data to a file
    */
   void savePlotDataToFile();
-
-  /**
-   * @brief Print a protocol message from hardware abstraction to the GUI
-   *
-   * @param message Message to print
-   */
-  void printProtocolMessage(const QString & message);
 
 private:
     /**
@@ -223,15 +223,24 @@ private:
 
   std::vector<double> plot_index_;
 
+  // Plot data
+  QVector<double> plot_x_;
+  QVector<double> velocity_left_;
+  QVector<double> setpoint_curve_data_;
+
+  // State
   bool connected_{false};
+  float setpoint_{0.0f};
 
+  // Plot objects
   QwtPlotCurve *wheel_velocity_curve_{nullptr};
-
   QwtPlotCurve *setpoint_curve_{nullptr};
 
-  static constexpr int kMaxPoints{100};
+  // Constants
+  static constexpr int kMaxPoints{500};
+  static constexpr float kMinSetpoint{-10.0f};
+  static constexpr float kMaxSetpoint{10.0f};
 
-  float setpoint_{0.0f};
 
   std::shared_ptr<std::vector<double>> status_velocity_left_ptr_{nullptr};
 };

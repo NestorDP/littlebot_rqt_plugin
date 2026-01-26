@@ -43,9 +43,9 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 
 
   connect(ui_.line_edit_setpoint, &QLineEdit::editingFinished, this,
-          &LittlebotGui::updateSetpoint);
-  connect(ui_.push_start_capture, &QPushButton::clicked, this, &LittlebotGui::startCapture);
-  connect(ui_.push_stop_capture, &QPushButton::clicked, this, &LittlebotGui::stopCapture);
+    &LittlebotGui::updateSetpoint);
+  connect(ui_.push_start_capture, &QPushButton::clicked, this,&LittlebotGui::startStream);
+  connect(ui_.push_stop_capture, &QPushButton::clicked, this, &LittlebotGui::stopStream);
   connect(ui_.push_get_status, &QPushButton::clicked, this,
     [this]() {emit requestDataStatus(true);});
   connect(ui_.combo_dev_serial_available, QOverload<int>::of(&QComboBox::activated),
@@ -63,7 +63,30 @@ LittlebotGui::LittlebotGui(QWidget *parent)
       emit connectHardware(currentPortName);
     });
 
+  ui_.qwt_plot->setTitle("Left Wheel Velocity");
+  if (wheel_velocity_curve_ == nullptr) {
+    wheel_velocity_curve_ = new QwtPlotCurve();
+    wheel_velocity_curve_->attach(ui_.qwt_plot);
+  }
+
+  wheel_velocity_curve_->setPen(Qt::blue, 2);
+  wheel_velocity_curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
   this->updatePlots();
+}
+
+LittlebotGui::~LittlebotGui()
+{
+  if (wheel_velocity_curve_) {
+    wheel_velocity_curve_->detach();
+    delete wheel_velocity_curve_;
+    wheel_velocity_curve_ = nullptr;
+  }
+
+  if (setpoint_curve_) {
+    setpoint_curve_->detach();
+    delete setpoint_curve_;
+    setpoint_curve_ = nullptr;
+  }
 }
 
 void LittlebotGui::updateAvailableDevices()
@@ -111,56 +134,27 @@ void LittlebotGui::updateAvailableDevices()
 
 void LittlebotGui::updatePlots()
 {
-  ui_.qwt_plot->setTitle("Left Wheel Velocity");
-  // ui_.qwt_plot->setAxisTitle(QwtPlot::xBottom, "Index");
-  // ui_.qwt_plot->setAxisTitle(QwtPlot::yLeft, "Value");
-
-  if (wheel_velocity_curve_ == nullptr) {
-    wheel_velocity_curve_ = new QwtPlotCurve();
-    wheel_velocity_curve_->attach(ui_.qwt_plot);
-  }
-
-  if (setpoint_curve_ == nullptr) {
-    setpoint_curve_ = new QwtPlotCurve();
-    setpoint_curve_->attach(ui_.qwt_plot);
-  }
-
   this->updateVelocitiesCurves();
   this->updateSetpointCurves();
-
   ui_.qwt_plot->replot();
 }
 
 void LittlebotGui::updateVelocitiesCurves()
 {
-  wheel_velocity_curve_->setPen(Qt::blue, 2);
-  wheel_velocity_curve_->setRenderHint(
-      QwtPlotItem::RenderAntialiased, true);
-
-  if (plot_index_.size() != status_velocity_left_ptr_->size()) {
-    if (plot_index_.empty()) {
-      plot_index_.resize(status_velocity_left_ptr_->size());
-      for (size_t i = 0; i < status_velocity_left_ptr_->size(); ++i) {
-        plot_index_[i] = static_cast<double>(i);
-      }
-    }
+  if (!wheel_velocity_curve_) {
+    return;
   }
-  wheel_velocity_curve_->setSamples(
-    plot_index_.data(), status_velocity_left_ptr_->data(),
-    std::min(plot_index_.size(),
-              status_velocity_left_ptr_->size()));
+
+  wheel_velocity_curve_->setSamples(plot_x_, velocity_left_);
 }
 
 void LittlebotGui::updateSetpointCurves()
 {
-  setpoint_curve_->setPen(Qt::red, 2);
-  setpoint_curve_->setRenderHint(QwtPlotItem::RenderAntialiased,
-                                  true);
-  setpoint_curve_->setSamples(
-    plot_index_.data(),
-    std::vector<double>(status_velocity_left_ptr_->size(),
-                        setpoint_).data(),
-    status_velocity_left_ptr_->size());
+  if (!setpoint_curve_) {
+    return;
+  }
+
+  setpoint_curve_->setSamples(plot_x_, setpoint_curve_data_);
 }
 
 void LittlebotGui::showError(const QString & message)
@@ -170,7 +164,7 @@ void LittlebotGui::showError(const QString & message)
   msgBox.exec();
 }
 
-void LittlebotGui::updateWidgetsWithConnectionState(bool connected)
+void LittlebotGui::updateConnectionState(bool connected)
 {
   connected_ = connected;
   if (connected) {
@@ -187,35 +181,38 @@ void LittlebotGui::updateWidgetsWithConnectionState(bool connected)
     ui_.push_stop_capture->setEnabled(false);
   }
 }
-void LittlebotGui::updateWidgetsWithDataStatus(const QVector<float> & data)
+
+void LittlebotGui::updateDataStatus(const QVector<float> & data)
 {
   if (data.size() < 4) {
     this->showError("Insufficient status data received.");
     return;
   }
 
+  auto position_left = data[0];
+  auto position_right = data[1];
+  auto velocity_left = data[2];
+  auto velocity_right = data[3];
+
+  Q_UNUSED(position_left)
+  Q_UNUSED(position_right)
+  Q_UNUSED(velocity_right)
+
+  // Append x index
+  auto next_x = plot_x_.isEmpty() ? 0.0 : plot_x_.back() + 1.0;
+  plot_x_.push_back(next_x);
+
+  // Append Y data
+  velocity_left_.push_back(velocity_left);
+  setpoint_curve_data_.push_back(setpoint_);
+
+  if (plot_x_.size() > kMaxPoints) {
+    plot_x_.removeFirst();
+    velocity_left_.removeFirst();
+    setpoint_curve_data_.removeFirst();
+  }
+
   if (ui_.tab_widget->currentIndex() == 0) {
-    auto velocity_left = data[0];
-    auto velocity_right = data[1];
-    auto position_left = data[2];
-    auto position_right = data[3];
-
-    auto current_index = plot_index_.empty() ? 0 : plot_index_.back() + 1;
-    plot_index_.push_back(current_index);
-
-    status_velocity_left_.push_back(velocity_left);
-    status_velocity_right_.push_back(velocity_right);
-    status_position_left_.push_back(position_left);
-    status_position_right_.push_back(position_right);
-
-    if (plot_index_.size() > kMaxPoints) {
-      plot_index_.erase(plot_index_.begin());
-      status_velocity_left_.erase(status_velocity_left_.begin());
-      status_velocity_right_.erase(status_velocity_right_.begin());
-      status_position_left_.erase(status_position_left_.begin());
-      status_position_right_.erase(status_position_right_.begin());
-    }
-
     this->updatePlots();
   } else {
     this->updateStatusDisplay(data);
@@ -236,12 +233,13 @@ void LittlebotGui::updateSetpoint()
     setpoint_ = new_setpoint;
     QVector<float> data;
     data.append(setpoint_);
-    emit sendVelocitiesCommand(data);
+    emit setVelocitiesCommand(data);
   } else {
     this->showError("Invalid setpoint value.");
     ui_.line_edit_setpoint->setText(QString::number(setpoint_, 'f', 2));
   }
 }
+
 void LittlebotGui::savePlotDataToFile()
 {
   QString fileName = QFileDialog::getSaveFileName(
