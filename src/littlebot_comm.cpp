@@ -139,6 +139,13 @@ void LittlebotComm::requestStatusFromHardware(const bool debug)
 void LittlebotComm::getDataStatus()
 {
   littlebot_base::WheelRTData state;
+
+  if (!littlebot_driver_) {
+    emit errorOccurred(QString("Cannot read data status: littlebot_driver_ is not connected."));
+    this->stopStreamTimer();
+    return;
+  }
+  
   littlebot_driver_->readRTData(state);
 
   QVector<float> data;
