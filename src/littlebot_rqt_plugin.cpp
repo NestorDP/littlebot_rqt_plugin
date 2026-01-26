@@ -116,8 +116,10 @@ void LittlebotRqtPlugin::shutdownPlugin()
     comm_ = nullptr;
   }
 
-  // Don't delete gui_ - let the plugin framework handle it
-  gui_ = nullptr;
+  if (gui_) {
+    delete gui_;
+    gui_ = nullptr;
+  }
 }
 
 void LittlebotRqtPlugin::littlebotStatus()
