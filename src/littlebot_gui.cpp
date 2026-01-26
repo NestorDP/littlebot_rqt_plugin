@@ -65,7 +65,7 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     });
 
   ui_.qwt_plot->setTitle("Left Wheel Velocity");
-  
+
   if (wheel_velocity_curve_ == nullptr) {
     wheel_velocity_curve_ = new QwtPlotCurve();
     wheel_velocity_curve_->attach(ui_.qwt_plot);
@@ -237,12 +237,16 @@ void LittlebotGui::littlebotCommand(const std::string & text)
 
 void LittlebotGui::updateSetpoint()
 {
+  //TODO: Validate input
   bool ok = false;
   float new_setpoint = ui_.line_edit_setpoint->text().toFloat(&ok);
   if (ok) {
     setpoint_ = new_setpoint;
     QVector<float> data;
-    data.append(setpoint_);
+    
+    // Apply the same setpoint to both left and right wheels
+    data.append(setpoint_);  // Left wheel velocity
+    data.append(setpoint_);  // Right wheel velocity
     emit setVelocitiesCommand(data);
   } else {
     this->showError("Invalid setpoint value.");
