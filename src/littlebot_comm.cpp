@@ -81,8 +81,11 @@ void LittlebotComm::connectHardware(QString portName)
 void LittlebotComm::disconnectHardware()
 {
   try {
-    if (littlebot_driver_) {
+    if (serial_port_ && serial_port_->isOpen()) {
       serial_port_->close();
+    }
+    
+    if (littlebot_driver_) {
       littlebot_driver_.reset();
     }
   } catch (const std::exception & ex) {
@@ -145,7 +148,7 @@ void LittlebotComm::getDataStatus()
     this->stopStreamTimer();
     return;
   }
-  
+
   littlebot_driver_->readRTData(state);
 
   QVector<float> data;
