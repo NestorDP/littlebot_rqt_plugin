@@ -94,7 +94,7 @@ void LittlebotComm::disconnectHardware()
         ex.what()));
     return;
   }
-    if (hardware_request_timer_->isActive()) {
+  if (hardware_request_timer_->isActive()) {
     this->hardware_request_timer_->stop();
   }
   emit connectionStatus(false);
