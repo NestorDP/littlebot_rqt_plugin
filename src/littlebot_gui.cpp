@@ -65,13 +65,22 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     });
 
   ui_.qwt_plot->setTitle("Left Wheel Velocity");
+  
   if (wheel_velocity_curve_ == nullptr) {
     wheel_velocity_curve_ = new QwtPlotCurve();
     wheel_velocity_curve_->attach(ui_.qwt_plot);
   }
-
   wheel_velocity_curve_->setPen(Qt::blue, 2);
   wheel_velocity_curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+
+
+  if (setpoint_curve_ == nullptr) {
+    setpoint_curve_ = new QwtPlotCurve("Setpoint");
+    setpoint_curve_->attach(ui_.qwt_plot);
+  }
+  setpoint_curve_->setPen(Qt::red, 2);
+  setpoint_curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+
   this->updatePlots();
 }
 
