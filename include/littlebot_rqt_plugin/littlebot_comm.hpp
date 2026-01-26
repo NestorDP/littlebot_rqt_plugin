@@ -148,12 +148,12 @@ private:
   QTimer *status_update_timer_;
 
   /**
-   * @brief Timer interval in milliseconds
+   * @brief Timer interval in milliseconds for hardware status requests
    */
   static constexpr int kRequestTimerInterval_ms{200};
 
   /**
-   * @brief Timer interval in milliseconds
+   * @brief Timer interval in milliseconds for GUI status updates
    */
   static constexpr int kStatusUpdateTimerInterval_ms{100};
 };
