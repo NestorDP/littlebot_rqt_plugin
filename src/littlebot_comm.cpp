@@ -84,7 +84,7 @@ void LittlebotComm::disconnectHardware()
     if (serial_port_ && serial_port_->isOpen()) {
       serial_port_->close();
     }
-    
+
     if (littlebot_driver_) {
       littlebot_driver_.reset();
     }
@@ -126,6 +126,11 @@ void LittlebotComm::stopStreamTimer()
 
 void LittlebotComm::requestStatusFromHardware(const bool debug)
 {
+  if (!littlebot_driver_) {
+    emit errorOccurred(QString("Cannot request status: littlebot_driver_ is not connected."));
+    this->hardware_request_timer_->stop();
+    return;
+  }
   auto request_ok = littlebot_driver_->requestStatus();
   if (!request_ok) {
     auto error_code = littlebot_driver_->getLastError();
