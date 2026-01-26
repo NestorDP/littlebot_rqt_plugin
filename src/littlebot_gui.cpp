@@ -44,7 +44,8 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 
   connect(ui_.line_edit_setpoint, &QLineEdit::editingFinished, this,
     &LittlebotGui::updateSetpoint);
-  connect(ui_.push_start_capture, &QPushButton::clicked, this,&LittlebotGui::startStream);
+  connect(ui_.push_start_capture, &QPushButton::clicked, this,
+    &LittlebotGui::startStream);
   connect(ui_.push_stop_capture, &QPushButton::clicked, this, &LittlebotGui::stopStream);
   connect(ui_.push_get_status, &QPushButton::clicked, this,
     [this]() {emit requestDataStatus(true);});
