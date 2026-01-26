@@ -30,8 +30,6 @@ namespace littlebot_rqt_plugin
 LittlebotGui::LittlebotGui(QWidget *parent)
 : QDialog(parent)
 {
-  status_velocity_left_ptr_ = std::make_shared<std::vector<double>>(status_velocity_left_);
-
   ui_.setupUi(this);
 
   ui_.push_start_capture->setEnabled(false);
@@ -243,7 +241,7 @@ void LittlebotGui::updateSetpoint()
   if (ok) {
     setpoint_ = new_setpoint;
     QVector<float> data;
-    
+
     // Apply the same setpoint to both left and right wheels
     data.append(setpoint_);  // Left wheel velocity
     data.append(setpoint_);  // Right wheel velocity
@@ -269,15 +267,16 @@ void LittlebotGui::savePlotDataToFile()
     return;
   }
 
-  QTextStream out(&file);
-  out << "Index,Velocity_Left,Velocity_Right,Position_Left," << "Position_Right\n";
-  size_t dataSize = plot_index_.size();
-  for (size_t i = 0; i < dataSize; ++i) {
-    out << plot_index_[i] << "," << status_velocity_left_[i]
-        << "," << status_velocity_right_[i] << ","
-        << status_position_left_[i] << ","
-        << status_position_right_[i] << "\n";
-  }
+  //TODO: Implement data saving for new data structures
+  // QTextStream out(&file);
+  // out << "Index,Velocity_Left,Velocity_Right,Position_Left," << "Position_Right\n";
+  // size_t dataSize = plot_index_.size();
+  // for (size_t i = 0; i < dataSize; ++i) {
+  //   out << plot__[i] << "," << status_velocity_left_[i]
+  //       << "," << status_velocity_right_[i] << ","
+  //       << status_position_left_[i] << ","
+  //       << status_position_right_[i] << "\n";
+  // }
 
   file.close();
 }
