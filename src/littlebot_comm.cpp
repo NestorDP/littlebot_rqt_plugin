@@ -81,8 +81,11 @@ void LittlebotComm::connectHardware(QString portName)
 void LittlebotComm::disconnectHardware()
 {
   try {
-    if (littlebot_driver_) {
+    if (serial_port_ && serial_port_->isOpen()) {
       serial_port_->close();
+    }
+
+    if (littlebot_driver_) {
       littlebot_driver_.reset();
     }
   } catch (const std::exception & ex) {
@@ -91,7 +94,7 @@ void LittlebotComm::disconnectHardware()
         ex.what()));
     return;
   }
-    if (hardware_request_timer_->isActive()) {
+  if (hardware_request_timer_->isActive()) {
     this->hardware_request_timer_->stop();
   }
   emit connectionStatus(false);
@@ -123,6 +126,11 @@ void LittlebotComm::stopStreamTimer()
 
 void LittlebotComm::requestStatusFromHardware(const bool debug)
 {
+  if (!littlebot_driver_) {
+    emit errorOccurred(QString("Cannot request status: littlebot_driver_ is not connected."));
+    this->hardware_request_timer_->stop();
+    return;
+  }
   auto request_ok = littlebot_driver_->requestStatus();
   if (!request_ok) {
     auto error_code = littlebot_driver_->getLastError();
@@ -139,6 +147,13 @@ void LittlebotComm::requestStatusFromHardware(const bool debug)
 void LittlebotComm::getDataStatus()
 {
   littlebot_base::WheelRTData state;
+
+  if (!littlebot_driver_) {
+    emit errorOccurred(QString("Cannot read data status: littlebot_driver_ is not connected."));
+    this->stopStreamTimer();
+    return;
+  }
+
   littlebot_driver_->readRTData(state);
 
   QVector<float> data;

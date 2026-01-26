@@ -30,8 +30,6 @@ namespace littlebot_rqt_plugin
 LittlebotGui::LittlebotGui(QWidget *parent)
 : QDialog(parent)
 {
-  status_velocity_left_ptr_ = std::make_shared<std::vector<double>>(status_velocity_left_);
-
   ui_.setupUi(this);
 
   ui_.push_start_capture->setEnabled(false);
@@ -44,7 +42,8 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 
   connect(ui_.line_edit_setpoint, &QLineEdit::editingFinished, this,
     &LittlebotGui::updateSetpoint);
-  connect(ui_.push_start_capture, &QPushButton::clicked, this,&LittlebotGui::startStream);
+  connect(ui_.push_start_capture, &QPushButton::clicked, this,
+    &LittlebotGui::startStream);
   connect(ui_.push_stop_capture, &QPushButton::clicked, this, &LittlebotGui::stopStream);
   connect(ui_.push_get_status, &QPushButton::clicked, this,
     [this]() {emit requestDataStatus(true);});
@@ -64,13 +63,22 @@ LittlebotGui::LittlebotGui(QWidget *parent)
     });
 
   ui_.qwt_plot->setTitle("Left Wheel Velocity");
+
   if (wheel_velocity_curve_ == nullptr) {
     wheel_velocity_curve_ = new QwtPlotCurve();
     wheel_velocity_curve_->attach(ui_.qwt_plot);
   }
-
   wheel_velocity_curve_->setPen(Qt::blue, 2);
   wheel_velocity_curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+
+
+  if (setpoint_curve_ == nullptr) {
+    setpoint_curve_ = new QwtPlotCurve("Setpoint");
+    setpoint_curve_->attach(ui_.qwt_plot);
+  }
+  setpoint_curve_->setPen(Qt::red, 2);
+  setpoint_curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+
   this->updatePlots();
 }
 
@@ -227,12 +235,16 @@ void LittlebotGui::littlebotCommand(const std::string & text)
 
 void LittlebotGui::updateSetpoint()
 {
+  //TODO: Validate input
   bool ok = false;
   float new_setpoint = ui_.line_edit_setpoint->text().toFloat(&ok);
   if (ok) {
     setpoint_ = new_setpoint;
     QVector<float> data;
-    data.append(setpoint_);
+
+    // Apply the same setpoint to both left and right wheels
+    data.append(setpoint_);  // Left wheel velocity
+    data.append(setpoint_);  // Right wheel velocity
     emit setVelocitiesCommand(data);
   } else {
     this->showError("Invalid setpoint value.");
@@ -255,15 +267,16 @@ void LittlebotGui::savePlotDataToFile()
     return;
   }
 
-  QTextStream out(&file);
-  out << "Index,Velocity_Left,Velocity_Right,Position_Left," << "Position_Right\n";
-  size_t dataSize = plot_index_.size();
-  for (size_t i = 0; i < dataSize; ++i) {
-    out << plot_index_[i] << "," << status_velocity_left_[i]
-        << "," << status_velocity_right_[i] << ","
-        << status_position_left_[i] << ","
-        << status_position_right_[i] << "\n";
-  }
+  //TODO: Implement data saving for new data structures
+  // QTextStream out(&file);
+  // out << "Index,Velocity_Left,Velocity_Right,Position_Left," << "Position_Right\n";
+  // size_t dataSize = plot_index_.size();
+  // for (size_t i = 0; i < dataSize; ++i) {
+  //   out << plot__[i] << "," << status_velocity_left_[i]
+  //       << "," << status_velocity_right_[i] << ","
+  //       << status_position_left_[i] << ","
+  //       << status_position_right_[i] << "\n";
+  // }
 
   file.close();
 }

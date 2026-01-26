@@ -213,16 +213,6 @@ private:
 
   std::vector<double> command_velocity_right_{0.0f};
 
-  std::vector<double> status_velocity_left_{0.0f};
-
-  std::vector<double> status_velocity_right_{0.0f};
-
-  std::vector<double> status_position_left_{0.0f};
-
-  std::vector<double> status_position_right_{0.0f};
-
-  std::vector<double> plot_index_;
-
   // Plot data
   QVector<double> plot_x_;
   QVector<double> velocity_left_;
@@ -240,9 +230,6 @@ private:
   static constexpr int kMaxPoints{500};
   static constexpr float kMinSetpoint{-10.0f};
   static constexpr float kMaxSetpoint{10.0f};
-
-
-  std::shared_ptr<std::vector<double>> status_velocity_left_ptr_{nullptr};
 };
 
 }  // namespace littlebot_rqt_plugin
