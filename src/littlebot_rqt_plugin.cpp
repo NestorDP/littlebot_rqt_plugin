@@ -66,44 +66,7 @@ LittlebotRqtPlugin::LittlebotRqtPlugin()
 
 LittlebotRqtPlugin::~LittlebotRqtPlugin()
 {
-  // Ensure cleanup happens even if shutdownPlugin wasn't called
-  
-  // Disconnect all signal-slot connections first
-  if (gui_ && comm_) {
-    disconnect(gui_, nullptr, comm_, nullptr);
-    disconnect(comm_, nullptr, gui_, nullptr);
-  }
-  
-  if (gui_) {
-    disconnect(gui_, nullptr, this, nullptr);
-  }
-  
-  if (ros_spin_timer_) {
-    disconnect(ros_spin_timer_, nullptr, this, nullptr);
-    ros_spin_timer_->stop();
-    delete ros_spin_timer_;
-    ros_spin_timer_ = nullptr;
-  }
-
-  // Reset ROS2 publishers/subscribers FIRST to clear callbacks
-  if (subscriber_) {
-    subscriber_.reset();
-  }
-
-  if (publisher_) {
-    publisher_.reset();
-  }
-
-  // Reset node before deleting other objects
-  node_.reset();
-
-  if (comm_) {
-    delete comm_;
-    comm_ = nullptr;
-  }
-
-  // gui_ is managed by the framework, don't delete it
-  gui_ = nullptr;
+  this->shutdownPlugin();
 }
 
 void LittlebotRqtPlugin::initPlugin(qt_gui_cpp::PluginContext & context)
