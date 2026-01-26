@@ -41,6 +41,8 @@ public:
   */
   explicit LittlebotComm(QObject *parent = nullptr);
 
+  ~LittlebotComm();
+
 signals:
   /**
    * @brief Signal emitted when new status data is available
@@ -148,7 +150,7 @@ private:
   /**
    * @brief Timer interval in milliseconds
    */
-  static constexpr int kRequestTimerInterval_ms{300};
+  static constexpr int kRequestTimerInterval_ms{200};
 
   /**
    * @brief Timer interval in milliseconds

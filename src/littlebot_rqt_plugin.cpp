@@ -23,19 +23,20 @@
 namespace littlebot_rqt_plugin
 {
 LittlebotRqtPlugin::LittlebotRqtPlugin()
-: rqt_gui_cpp::Plugin(),
-  gui_(new LittlebotGui()),
-  comm_(new LittlebotComm())
+: rqt_gui_cpp::Plugin()
 {
+  gui_  = new LittlebotGui();
+  comm_ = new LittlebotComm();  // No parent - we'll manage lifetime manually
+
   gui_->setObjectName("LittlebotGui");
   comm_->setObjectName("LittlebotComm");
 
   node_ = std::make_shared<rclcpp::Node>("littlebot_rqt_plugin");
 
-  QTimer *ros_spin_timer = new QTimer(this);
-  connect(ros_spin_timer, &QTimer::timeout, this,
+  ros_spin_timer_ = new QTimer();  // No parent - we'll manage lifetime manually
+  connect(ros_spin_timer_, &QTimer::timeout, this,
           &LittlebotRqtPlugin::handleSpinOnTimer);
-  ros_spin_timer->start(500);
+  ros_spin_timer_->start(500);
 
   connect(gui_, &LittlebotGui::connectHardware, comm_,
           &LittlebotComm::connectHardware);
@@ -63,6 +64,48 @@ LittlebotRqtPlugin::LittlebotRqtPlugin()
   createSubscriber();
 }
 
+LittlebotRqtPlugin::~LittlebotRqtPlugin()
+{
+  // Ensure cleanup happens even if shutdownPlugin wasn't called
+  
+  // Disconnect all signal-slot connections first
+  if (gui_ && comm_) {
+    disconnect(gui_, nullptr, comm_, nullptr);
+    disconnect(comm_, nullptr, gui_, nullptr);
+  }
+  
+  if (gui_) {
+    disconnect(gui_, nullptr, this, nullptr);
+  }
+  
+  if (ros_spin_timer_) {
+    disconnect(ros_spin_timer_, nullptr, this, nullptr);
+    ros_spin_timer_->stop();
+    delete ros_spin_timer_;
+    ros_spin_timer_ = nullptr;
+  }
+
+  // Reset ROS2 publishers/subscribers FIRST to clear callbacks
+  if (subscriber_) {
+    subscriber_.reset();
+  }
+
+  if (publisher_) {
+    publisher_.reset();
+  }
+
+  // Reset node before deleting other objects
+  node_.reset();
+
+  if (comm_) {
+    delete comm_;
+    comm_ = nullptr;
+  }
+
+  // gui_ is managed by the framework, don't delete it
+  gui_ = nullptr;
+}
+
 void LittlebotRqtPlugin::initPlugin(qt_gui_cpp::PluginContext & context)
 {
   context.addWidget(gui_);
@@ -75,22 +118,43 @@ void LittlebotRqtPlugin::handleSpinOnTimer()
 
 void LittlebotRqtPlugin::shutdownPlugin()
 {
-  // clean up rclcpp node
+  // Disconnect all signal-slot connections first
+  if (gui_ && comm_) {
+    disconnect(gui_, nullptr, comm_, nullptr);
+    disconnect(comm_, nullptr, gui_, nullptr);
+  }
+  
+  if (gui_) {
+    disconnect(gui_, nullptr, this, nullptr);
+  }
+  
+  // Clean up in reverse order of creation
+  if (ros_spin_timer_) {
+    disconnect(ros_spin_timer_, nullptr, this, nullptr);
+    ros_spin_timer_->stop();
+    delete ros_spin_timer_;
+    ros_spin_timer_ = nullptr;
+  }
+
+  // Reset ROS2 publishers/subscribers FIRST to clear callbacks
+  if (subscriber_) {
+    subscriber_.reset();
+  }
+
+  if (publisher_) {
+    publisher_.reset();
+  }
+
+  // Reset node before deleting other objects
   node_.reset();
 
   if (comm_) {
-    comm_->disconnect();
-    comm_->setParent(nullptr);
-    comm_->deleteLater();
+    delete comm_;
     comm_ = nullptr;
   }
-  if (gui_) {
-    gui_->disconnect();
-    gui_->close();
-    gui_->setParent(nullptr);
-    gui_->deleteLater();
-    gui_ = nullptr;
-  }
+
+  // Don't delete gui_ - let the plugin framework handle it
+  gui_ = nullptr;
 }
 
 void LittlebotRqtPlugin::littlebotStatus()
@@ -111,9 +175,9 @@ void LittlebotRqtPlugin::createSubscriber()
 {
   connect(this, &LittlebotRqtPlugin::littlebotCommand, gui_, &LittlebotGui::littlebotCommand);
   auto message_callback = [this](std_msgs::msg::String msg) -> void {
-      RCLCPP_INFO(node_->get_logger(), "I heard: '%s'", msg.data.c_str());
-      emit littlebotCommand(msg.data);
-    };
+    RCLCPP_INFO(node_->get_logger(), "I heard: '%s'", msg.data.c_str());
+    emit littlebotCommand(msg.data);
+  };
   subscriber_ =
     node_->create_subscription<std_msgs::msg::String>("littlebot_text",
       10, message_callback);
@@ -121,4 +185,4 @@ void LittlebotRqtPlugin::createSubscriber()
 }  // namespace littlebot_rqt_plugin
 
 PLUGINLIB_EXPORT_CLASS(littlebot_rqt_plugin::LittlebotRqtPlugin,
-                       rqt_gui_cpp::Plugin)
+                      rqt_gui_cpp::Plugin)

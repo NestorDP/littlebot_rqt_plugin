@@ -61,7 +61,7 @@ public:
   /**
    * @brief Destroy the Littlebot GUI object
    */
-  ~LittlebotGui() override = default;
+  ~LittlebotGui();
 
   /**
    * @brief Update the status display in the GUI
@@ -223,15 +223,24 @@ private:
 
   std::vector<double> plot_index_;
 
+  // Plot data
+  QVector<double> plot_x_;
+  QVector<double> velocity_left_;
+  QVector<double> setpoint_curve_data_;
+
+  // State
   bool connected_{false};
+  float setpoint_{0.0f};
 
+  // Plot objects
   QwtPlotCurve *wheel_velocity_curve_{nullptr};
-
   QwtPlotCurve *setpoint_curve_{nullptr};
 
-  static constexpr int kMaxPoints{100};
+  // Constants
+  static constexpr int kMaxPoints{500};
+  static constexpr float kMinSetpoint{-10.0f};
+  static constexpr float kMaxSetpoint{10.0f};
 
-  float setpoint_{0.0f};
 
   std::shared_ptr<std::vector<double>> status_velocity_left_ptr_{nullptr};
 };

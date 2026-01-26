@@ -30,6 +30,23 @@ LittlebotComm::LittlebotComm(QObject *parent)
     [this]() {this->getDataStatus();});
 }
 
+LittlebotComm::~LittlebotComm()
+{
+  this->disconnectHardware();
+  if (hardware_request_timer_->isActive()) {
+    hardware_request_timer_->stop();
+  }
+  if (status_update_timer_->isActive()) {
+    status_update_timer_->stop();
+  }
+  
+  // Explicitly reset all shared pointers to ensure cleanup
+  serial_port_.reset();
+  rt_state_buffer_.reset();
+  rt_command_buffer_.reset();
+  littlebot_driver_.reset();
+}
+
 void LittlebotComm::connectHardware(QString portName)
 {
   serial_port_ = std::make_shared<littlebot_base::SerialPort>();
@@ -108,7 +125,8 @@ void LittlebotComm::requestStatusFromHardware(const bool debug)
 {
   auto request_ok = littlebot_driver_->requestStatus();
   if (!request_ok) {
-    emit errorOccurred(QString::fromStdString("Error during status update: "));
+    auto error_code = littlebot_driver_->getLastError();
+    emit errorOccurred(QString("Error during status update: %1").arg(static_cast<int>(error_code)));
     this->hardware_request_timer_->stop();
   }
 

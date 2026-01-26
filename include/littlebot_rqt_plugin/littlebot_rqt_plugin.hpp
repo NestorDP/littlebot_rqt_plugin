@@ -35,7 +35,7 @@ class LittlebotRqtPlugin : public rqt_gui_cpp::Plugin
 public:
   LittlebotRqtPlugin();
 
-  ~LittlebotRqtPlugin() override = default;
+  ~LittlebotRqtPlugin() override;
 
 signals:
   void littlebotCommand(const std::string & text);
@@ -62,5 +62,7 @@ private:
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
 
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscriber_;
+
+  QTimer *ros_spin_timer_{nullptr};
 };
 }  // namespace littlebot_rqt_plugin

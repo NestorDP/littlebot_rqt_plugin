@@ -43,8 +43,8 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 
 
   connect(ui_.line_edit_setpoint, &QLineEdit::editingFinished, this,
-          &LittlebotGui::updateSetpoint);
-  connect(ui_.push_start_capture, &QPushButton::clicked, this, &LittlebotGui::startStream);
+    &LittlebotGui::updateSetpoint);
+  connect(ui_.push_start_capture, &QPushButton::clicked, this,&LittlebotGui::startStream);
   connect(ui_.push_stop_capture, &QPushButton::clicked, this, &LittlebotGui::stopStream);
   connect(ui_.push_get_status, &QPushButton::clicked, this,
     [this]() {emit requestDataStatus(true);});
@@ -72,6 +72,21 @@ LittlebotGui::LittlebotGui(QWidget *parent)
   wheel_velocity_curve_->setPen(Qt::blue, 2);
   wheel_velocity_curve_->setRenderHint(QwtPlotItem::RenderAntialiased, true);
   this->updatePlots();
+}
+
+LittlebotGui::~LittlebotGui()
+{
+  if (wheel_velocity_curve_) {
+    wheel_velocity_curve_->detach();
+    delete wheel_velocity_curve_;
+    wheel_velocity_curve_ = nullptr;
+  }
+
+  if (setpoint_curve_) {
+    setpoint_curve_->detach();
+    delete setpoint_curve_;
+    setpoint_curve_ = nullptr;
+  }
 }
 
 void LittlebotGui::updateAvailableDevices()
@@ -166,6 +181,7 @@ void LittlebotGui::updateConnectionState(bool connected)
     ui_.push_stop_capture->setEnabled(false);
   }
 }
+
 void LittlebotGui::updateDataStatus(const QVector<float> & data)
 {
   if (data.size() < 4) {
@@ -173,28 +189,30 @@ void LittlebotGui::updateDataStatus(const QVector<float> & data)
     return;
   }
 
+  auto position_left = data[0];
+  auto position_right = data[1];
+  auto velocity_left = data[2];
+  auto velocity_right = data[3];
+
+  Q_UNUSED(position_left)
+  Q_UNUSED(position_right)
+  Q_UNUSED(velocity_right)
+
+  // Append x index
+  auto next_x = plot_x_.isEmpty() ? 0.0 : plot_x_.back() + 1.0;
+  plot_x_.push_back(next_x);
+
+  // Append Y data
+  velocity_left_.push_back(velocity_left);
+  setpoint_curve_data_.push_back(setpoint_);
+
+  if (plot_x_.size() > kMaxPoints) {
+    plot_x_.removeFirst();
+    velocity_left_.removeFirst();
+    setpoint_curve_data_.removeFirst();
+  }
+
   if (ui_.tab_widget->currentIndex() == 0) {
-    auto velocity_left = data[0];
-    auto velocity_right = data[1];
-    auto position_left = data[2];
-    auto position_right = data[3];
-
-    auto current_index = plot_index_.empty() ? 0 : plot_index_.back() + 1;
-    plot_index_.push_back(current_index);
-
-    status_velocity_left_.push_back(velocity_left);
-    status_velocity_right_.push_back(velocity_right);
-    status_position_left_.push_back(position_left);
-    status_position_right_.push_back(position_right);
-
-    if (plot_index_.size() > kMaxPoints) {
-      plot_index_.erase(plot_index_.begin());
-      status_velocity_left_.erase(status_velocity_left_.begin());
-      status_velocity_right_.erase(status_velocity_right_.begin());
-      status_position_left_.erase(status_position_left_.begin());
-      status_position_right_.erase(status_position_right_.begin());
-    }
-
     this->updatePlots();
   } else {
     this->updateStatusDisplay(data);
@@ -221,6 +239,7 @@ void LittlebotGui::updateSetpoint()
     ui_.line_edit_setpoint->setText(QString::number(setpoint_, 'f', 2));
   }
 }
+
 void LittlebotGui::savePlotDataToFile()
 {
   QString fileName = QFileDialog::getSaveFileName(
