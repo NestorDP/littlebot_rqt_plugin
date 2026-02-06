@@ -116,10 +116,8 @@ void LittlebotRqtPlugin::shutdownPlugin()
     comm_ = nullptr;
   }
 
-  if (gui_) {
-    delete gui_;
-    gui_ = nullptr;
-  }
+  // gui_ is owned and destroyed by the Qt plugin framework
+  gui_ = nullptr;
 }
 
 void LittlebotRqtPlugin::littlebotStatus()

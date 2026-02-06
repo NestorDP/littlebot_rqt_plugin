@@ -16,6 +16,7 @@
 #include "littlebot_rqt_plugin/littlebot_comm.hpp"
 
 #include "littlebot_base/serial_port.hpp"
+#include "littlebot_base/littlebot_driver_factory.hpp"
 
 namespace littlebot_rqt_plugin
 {
@@ -47,30 +48,42 @@ LittlebotComm::~LittlebotComm()
   littlebot_driver_.reset();
 }
 
-void LittlebotComm::connectHardware(QString portName)
+void LittlebotComm::connectHardware(QString port_name)
 {
-  serial_port_ = std::make_shared<littlebot_base::SerialPort>();
+  QString error_message;
 
-  if (!serial_port_->open(portName.toStdString(), 115200)) {
-    emit errorOccurred("Failed to open serial port: " + portName);
-    return;
-  }
-
-  rt_state_buffer_ = std::make_shared<littlebot_base::RosRTBuffer>();
-  rt_command_buffer_ = std::make_shared<littlebot_base::RosRTBuffer>();
   std::vector<std::string> joint_names{"left_wheel", "right_wheel"};
 
-  try {
-    littlebot_driver_ =
-      std::make_shared<littlebot_base::LittlebotDriver>(
-        serial_port_,
-        rt_state_buffer_,
-        rt_command_buffer_,
-        joint_names);
-  } catch (const std::exception & ex) {
-    emit errorOccurred(QString::fromStdString(std::string("Connection failed: ") + ex.what()));
-    return;
+  // Create the Littlebot driver factory if it has not been injected (e.g. for tests)
+  if (!driver_factory_) {
+    driver_factory_ = std::make_shared<littlebot_base::LittlebotDriverFactory>();
   }
+
+  auto result_driver_factory = driver_factory_->create(
+    port_name.toStdString(), 115200, joint_names);
+
+  // if (!result_driver_factory) {
+  //   switch (result_driver_factory.error())
+  //   {
+  //   case littlebot_base::DriverError::SerialNotOpen:
+  //     error_message = "Failed to open serial port: " + port_name;
+  //     break;
+  //   case littlebot_base::DriverError::SerialConfigBaudrateFailed:
+  //     emit errorOccurred("Failed to configure baudrate for port: " + port_name);
+  //     break;
+  //     /* code */
+  //     break;
+  //   }
+  //   default:
+  //     break;
+  //   }
+    // emit errorOccurred("Failed to create Littlebot driver:");
+    // return;
+  // }
+
+  littlebot_driver_ = result_driver_factory.value();
+
+
   if (!hardware_request_timer_->isActive()) {
     this->hardware_request_timer_->start(kRequestTimerInterval_ms);
   }
