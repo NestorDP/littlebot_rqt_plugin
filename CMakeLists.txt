@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(littlebot_rqt_plugin)
 
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 20)
+  set(CMAKE_CXX_STANDARD 23)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -55,8 +55,12 @@ set(${PROJECT_NAME}_INCLUDE_DIR
 qt5_wrap_cpp(${PROJECT_NAME}_LIB_MOC ${${PROJECT_NAME}_HEADERS})
 qt5_wrap_ui(${PROJECT_NAME}_UI_MOC ${${PROJECT_NAME}_QT_UI_SOURCES})
 
-set(QWT_INCLUDE_DIRS /usr/include/qwt)
-set(QWT_LIBRARIES /usr/lib/libqwt-qt5.so)
+# Prefer the newer Qwt installed under /usr/local/qwt-6.2.0.
+set(QWT_INCLUDE_DIRS /usr/local/qwt-6.2.0/include CACHE PATH "Qwt include dir" FORCE)
+set(QWT_LIBRARIES /usr/local/qwt-6.2.0/lib/libqwt.so CACHE FILEPATH "Qwt library" FORCE)
+if(NOT EXISTS "${QWT_INCLUDE_DIRS}/qwt_plot.h" OR NOT EXISTS "${QWT_LIBRARIES}")
+  message(FATAL_ERROR "Qwt 6.2.0 not found under /usr/local/qwt-6.2.0. Reinstall or update paths.")
+endif()
 
 add_library(${PROJECT_NAME} SHARED
   ${${PROJECT_NAME}_SRCS}
@@ -64,8 +68,8 @@ add_library(${PROJECT_NAME} SHARED
   ${${PROJECT_NAME}_UI_MOC}
 )
 
-# Qwt is not fully compatible with C++20 in some system packages; build this target with C++17
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
+# littlebot_base uses C++23 features (std::expected); build this target with C++23
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 23)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 
 target_include_directories(${PROJECT_NAME} PUBLIC

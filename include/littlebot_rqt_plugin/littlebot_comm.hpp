@@ -19,6 +19,7 @@
 #include <QTimer>
 #include <QVector>
 
+#include <expected>
 #include <map>
 #include <memory>
 #include <string>
@@ -27,6 +28,7 @@
 #include "littlebot_base/serial_port.hpp"
 #include "littlebot_base/ros_rt_buffer.hpp"
 #include "littlebot_base/types.hpp"
+#include "littlebot_base/i_littlebot_driver_factory.hpp"
 
 namespace littlebot_rqt_plugin
 {
@@ -42,6 +44,17 @@ public:
   explicit LittlebotComm(QObject *parent = nullptr);
 
   ~LittlebotComm();
+
+  /**
+   * @brief Set the Littlebot driver factory
+   *
+   * @param factory Shared pointer to the Littlebot driver factory
+   * @note This method is mainly used for testing purposes
+   */
+  void setDriverFactory(std::shared_ptr<littlebot_base::ILittlebotDriverFactory> factory)
+  {
+    driver_factory_ = std::move(factory);
+  }
 
 signals:
   /**
@@ -118,9 +131,14 @@ public slots:
 
 private:
   /**
+   * @brief Shared pointer to the Littlebot driver factory
+   */
+  std::shared_ptr<littlebot_base::ILittlebotDriverFactory> driver_factory_;
+
+  /**
    * @brief Littlebot driver instance
    */
-  std::shared_ptr<littlebot_base::LittlebotDriver> littlebot_driver_;
+  std::shared_ptr<littlebot_base::ILittlebotDriver> littlebot_driver_;
 
   /**
    * @brief Serial port interface
