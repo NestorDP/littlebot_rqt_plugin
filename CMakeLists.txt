@@ -10,22 +10,26 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/ui")
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rqt_gui_cpp REQUIRED)
-find_package(Qt5 REQUIRED COMPONENTS Widgets)
 find_package(qt_gui_cpp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(littlebot_base REQUIRED)
 find_package(realtime_tools REQUIRED)
 
+# Qt5 + Charts (no QWT)
+find_package(Qt5 REQUIRED COMPONENTS Widgets Charts)
+
 # Find libserial using pkg-config
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBSERIAL REQUIRED IMPORTED_TARGET libserial)
-
 
 set(${PROJECT_NAME}_SRCS
   src/littlebot_rqt_plugin.cpp
@@ -43,46 +47,26 @@ set(${PROJECT_NAME}_QT_UI_SOURCES
   ui/littlebot_gui.ui
 )
 
-set(${PROJECT_NAME}_INCLUDE_DIR
-  include
-  ${rclcpp_INCLUDE_DIRS}
-  ${qt_gui_cpp_INCLUDE_DIRS}
-  ${rqt_gui_cpp_INCLUDE_DIRS}
-  ${std_msgs_INCLUDE_DIRS}
-  ${Qt5Widgets_INCLUDE_DIRS}
-)
-
-qt5_wrap_cpp(${PROJECT_NAME}_LIB_MOC ${${PROJECT_NAME}_HEADERS})
-qt5_wrap_ui(${PROJECT_NAME}_UI_MOC ${${PROJECT_NAME}_QT_UI_SOURCES})
-
-# Prefer the newer Qwt installed under /usr/local/qwt-6.2.0.
-set(QWT_INCLUDE_DIRS /usr/local/qwt-6.2.0/include CACHE PATH "Qwt include dir" FORCE)
-set(QWT_LIBRARIES /usr/local/qwt-6.2.0/lib/libqwt.so CACHE FILEPATH "Qwt library" FORCE)
-if(NOT EXISTS "${QWT_INCLUDE_DIRS}/qwt_plot.h" OR NOT EXISTS "${QWT_LIBRARIES}")
-  message(FATAL_ERROR "Qwt 6.2.0 not found under /usr/local/qwt-6.2.0. Reinstall or update paths.")
-endif()
-
 add_library(${PROJECT_NAME} SHARED
   ${${PROJECT_NAME}_SRCS}
-  ${${PROJECT_NAME}_LIB_MOC}
-  ${${PROJECT_NAME}_UI_MOC}
+  ${${PROJECT_NAME}_HEADERS}
+  ${${PROJECT_NAME}_QT_UI_SOURCES}
 )
 
-# littlebot_base uses C++23 features (std::expected); build this target with C++23
+# littlebot_base uses C++23 features
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 23)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-  ${${PROJECT_NAME}_INCLUDE_DIR}
+  include
   ${LIBSERIAL_INCLUDE_DIRS}
-  ${QWT_INCLUDE_DIRS}
   ${littlebot_base_INCLUDE_DIRS}
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-  ${QWT_LIBRARIES}
   PkgConfig::LIBSERIAL
   Qt5::Widgets
+  Qt5::Charts
   littlebot_base::littlebot_driver
   littlebot_base::serial_port
 )
@@ -90,7 +74,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 ament_target_dependencies(${PROJECT_NAME} PUBLIC
   pluginlib
   qt_gui_cpp
-  Qt5Widgets
   rclcpp
   rqt_gui_cpp
   std_msgs
@@ -128,16 +111,12 @@ pluginlib_export_plugin_description_file(rqt_gui "plugin.xml")
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
 
-#Testing
+# Testing
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_lint_auto REQUIRED)
-
-  # Lint tests
   ament_lint_auto_find_test_dependencies()
 endif()
-
-
 
 ament_package()

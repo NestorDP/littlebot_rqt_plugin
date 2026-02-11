@@ -15,13 +15,10 @@
 
 #pragma once
 
-/**
- * To more information about the serial library used,
- * please visit: https://github.com/NestorDP/cppserial
- */
-#include <qwt_legend.h>
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
+#include <QtCharts/QChart>
+#include <QtCharts/QLineSeries>
+#include <QtCharts/QValueAxis>
+#include <QtCharts/QChartView>
 
 #include <QFile>
 #include <QFileDialog>
@@ -34,6 +31,10 @@
 #include <string>
 #include <vector>
 
+/**
+ * To more information about the serial library used,
+ * please visit: https://github.com/NestorDP/cppserial
+ */
 #include "libserial/device.hpp"
 #include "libserial/ports.hpp"
 
@@ -223,8 +224,8 @@ private:
   float setpoint_{0.0f};
 
   // Plot objects
-  QwtPlotCurve *wheel_velocity_curve_{nullptr};
-  QwtPlotCurve *setpoint_curve_{nullptr};
+  QtCharts::QLineSeries *wheel_velocity_series_{nullptr};
+  QtCharts::QLineSeries *setpoint_series_{nullptr};
 
   // Constants
   static constexpr int kMaxPoints{500};
