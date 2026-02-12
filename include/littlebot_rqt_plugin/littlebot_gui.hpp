@@ -215,9 +215,9 @@ private:
   std::vector<double> command_velocity_right_{0.0f};
 
   // Plot data
-  QVector<double> plot_x_;
-  QVector<double> velocity_left_;
-  QVector<double> setpoint_curve_data_;
+  QVector<double> plot_x_data_;
+  QVector<double> velocity_left_data_;
+  QVector<double> setpoint_data_;
 
   // State
   bool connected_{false};

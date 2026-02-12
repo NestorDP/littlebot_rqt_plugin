@@ -73,15 +73,15 @@ LittlebotGui::LittlebotGui(QWidget *parent)
   auto *chart = new QtCharts::QChart();
   chart->addSeries(wheelSeries);
   chart->addSeries(setpointSeries);
-  chart->setTitle("Wheel Velocity");
+  // chart->setTitle("Wheel Velocity");
 
   // Create axes
   auto *axisX = new QtCharts::QValueAxis();
-  axisX->setTitleText("Time (s)");
+  // axisX->setTitleText("Time (s)");
   axisX->setRange(0, 10);
 
   auto *axisY = new QtCharts::QValueAxis();
-  axisY->setTitleText("Velocity");
+  // axisY->setTitleText("Velocity");
   axisY->setRange(-10, 10);
 
   // Add axes to chart
@@ -105,17 +105,15 @@ LittlebotGui::LittlebotGui(QWidget *parent)
 
 LittlebotGui::~LittlebotGui()
 {
-  // if (wheel_velocity_curve_) {
-  //   wheel_velocity_curve_->detach();
-  //   delete wheel_velocity_curve_;
-  //   wheel_velocity_curve_ = nullptr;
-  // }
+  if (wheel_velocity_series_) {
+    delete wheel_velocity_series_;
+    wheel_velocity_series_ = nullptr;
+  }
 
-  // if (setpoint_curve_) {
-  //   setpoint_curve_->detach();
-  //   delete setpoint_curve_;
-  //   setpoint_curve_ = nullptr;
-  // }
+  if (setpoint_series_) {
+    delete setpoint_series_;
+    setpoint_series_ = nullptr;
+  }
 }
 
 void LittlebotGui::updateAvailableDevices()
@@ -163,18 +161,24 @@ void LittlebotGui::updateAvailableDevices()
 
 void LittlebotGui::updatePlots()
 {
-  // this->updateVelocitiesCurves();
-  // this->updateSetpointCurves();
-  // ui_.qwt_plot->replot();
+  this->updateVelocitiesCurves();
+  this->updateSetpointCurves();
 }
 
 void LittlebotGui::updateVelocitiesCurves()
 {
-  if (!wheel_velocity_series_) {
+    if (!wheel_velocity_series_) {
     return;
   }
 
-  // wheel_velocity_series_->setSamples(plot_x_, velocity_left_);
+  QVector<QPointF> points;
+  points.reserve(plot_x_data_.size());
+
+  for (int i = 0; i < plot_x_data_.size(); ++i) {
+    points.append(QPointF(plot_x_data_[i], velocity_left_data_[i]));
+  }
+
+  wheel_velocity_series_->replace(points);
 }
 
 void LittlebotGui::updateSetpointCurves()
@@ -183,7 +187,14 @@ void LittlebotGui::updateSetpointCurves()
     return;
   }
 
-  // setpoint_series_->setSamples(plot_x_, setpoint_curve_data_);
+  QVector<QPointF> points;
+  points.reserve(plot_x_data_.size());
+
+  for (int i = 0; i < plot_x_data_.size(); ++i) {
+    points.append(QPointF(plot_x_data_[i], setpoint_data_[i]));
+  }
+
+  setpoint_series_->replace(points);
 }
 
 void LittlebotGui::showError(const QString & message)
@@ -218,34 +229,34 @@ void LittlebotGui::updateDataStatus(const QVector<float> & data)
     return;
   }
 
-  auto position_left = data[0];
+  auto position_left  = data[0];
   auto position_right = data[1];
-  auto velocity_left = data[2];
+  auto velocity_left  = data[2];
   auto velocity_right = data[3];
 
   Q_UNUSED(position_left)
   Q_UNUSED(position_right)
   Q_UNUSED(velocity_right)
 
-  // // Append x index
-  // auto next_x = plot_x_.isEmpty() ? 0.0 : plot_x_.back() + 1.0;
-  // plot_x_.push_back(next_x);
+  // Append x index
+  auto next_x = plot_x_data_.isEmpty() ? 0.0 : plot_x_data_.back() + 1.0;
+  plot_x_data_.push_back(next_x);
 
-  // // Append Y data
-  // velocity_left_.push_back(velocity_left);
-  // setpoint_curve_data_.push_back(setpoint_);
+  // Append Y data
+  velocity_left_data_.push_back(velocity_left);
+  setpoint_data_.push_back(setpoint_);
 
-  // if (plot_x_.size() > kMaxPoints) {
-  //   plot_x_.removeFirst();
-  //   velocity_left_.removeFirst();
-  //   setpoint_curve_data_.removeFirst();
-  // }
+  if (plot_x_data_.size() > kMaxPoints) {
+    plot_x_data_.removeFirst();
+    velocity_left_data_.removeFirst();
+    setpoint_data_.removeFirst();
+  }
 
-  // if (ui_.tab_widget->currentIndex() == 0) {
-  //   this->updatePlots();
-  // } else {
-  //   this->updateStatusDisplay(data);
-  // }
+  if (ui_.tab_widget->currentIndex() == 0) {
+    this->updatePlots();
+  } else {
+    this->updateStatusDisplay(data);
+  }
 }
 
 void LittlebotGui::littlebotCommand(const std::string & text)
